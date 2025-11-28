@@ -21,8 +21,6 @@ app.UseAntiforgery();
 
 app.MapStaticAssets();
 
-app.MapGet("/", () => Results.Redirect("/Admin/"));
-
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.Run();

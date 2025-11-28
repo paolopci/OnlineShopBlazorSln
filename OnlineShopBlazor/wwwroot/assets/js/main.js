@@ -141,18 +141,20 @@
     
     
     /*instagram activation*/
-    $.instagramFeed({
-        'username': 'portfolio.devitems',
-        'container': "#instagramFeed",
-        'display_profile': false,
-        'display_biography': false,
-        'display_gallery': true,
-        'styling': false,
-        'items': 8,
-        "image_size": "480",
-        'items_per_row': 4,
-        'margin': 2,
-    });
+    if ($.instagramFeed) {
+        $.instagramFeed({
+            'username': 'portfolio.devitems',
+            'container': "#instagramFeed",
+            'display_profile': false,
+            'display_biography': false,
+            'display_gallery': true,
+            'styling': false,
+            'items': 8,
+            "image_size": "480",
+            'items_per_row': 4,
+            'margin': 2,
+        });
+    }
 
       /*---  ScrollUp Active ---*/
     $.scrollUp({

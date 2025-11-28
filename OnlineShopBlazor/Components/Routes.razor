@@ -1,23 +1,12 @@
-﻿@inject NavigationManager NavigationManager
-<Router AppAssembly="typeof(Program).Assembly">
+﻿<Router AppAssembly="typeof(Program).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.DefaultLayout)" />
+        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.AdminLayout)" />
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
     <NotFound>
-        @{
-            var uri = new Uri(NavigationManager.Uri);
-            if (uri.AbsolutePath == "/")
-            {
-                NavigationManager.NavigateTo("Admin/", true);
-            }
-            else
-            {
-                        <PageTitle>Not found</PageTitle>
-                        <LayoutView Layout="@typeof(Layout.AdminLayout)">
-                            <p role="alert">Sorry, there's nothing at this address.</p>
-                        </LayoutView>
-            }
-        }
+        <PageTitle>Not found</PageTitle>
+        <LayoutView Layout="@typeof(Layout.DefaultLayout)">
+            <p role="alert">Sorry, there's nothing at this address.</p>
+        </LayoutView>
     </NotFound>
 </Router>
