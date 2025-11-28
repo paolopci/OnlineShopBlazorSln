@@ -5,12 +5,12 @@
 @implements IAsyncDisposable
 @inject IDbContextFactory<OnlineShopBlazor.Models.Db.OnLineShopContext> DbFactory
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Menus Index</PageTitle>
 
-<h1>Index</h1>
+<h1>Menus Index</h1>
 
 <p>
-    <a href="menus/create">Create New</a>
+    <a class="btn btn-success p-1" href="menus/create">Create New</a>
 </p>
 
 <QuickGrid Class="table" Items="context.Menus">
@@ -19,9 +19,9 @@
     <PropertyColumn Property="menu => menu.Type" />
 
     <TemplateColumn Context="menu">
-        <a href="@($"menus/edit?id={menu.Id}")">Edit</a> |
-        <a href="@($"menus/details?id={menu.Id}")">Details</a> |
-        <a href="@($"menus/delete?id={menu.Id}")">Delete</a>
+        <a class="btn btn-warning btn-sm me-1" href="@($"menus/edit?id={menu.Id}")">Edit</a>
+        <a class="btn btn-info btn-sm me-1" href="@($"menus/details?id={menu.Id}")">Details</a>
+        <a class="btn btn-danger btn-sm" href="@($"menus/delete?id={menu.Id}")">Delete</a>
     </TemplateColumn>
 </QuickGrid>
 
