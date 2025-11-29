@@ -2,16 +2,16 @@
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using OnlineShopBlazor.Models.Db
-@using OnlineShopBlazor.Models.Db
+
 @implements IAsyncDisposable
 @inject IDbContextFactory<OnlineShopBlazor.Models.Db.OnLineShopContext> DbFactory
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Banners</PageTitle>
 
-<h1>Index</h1>
+<h1>Banners</h1>
 
 <p>
-    <a href="banners/create">Create New</a>
+    <a class="btn btn-success p-1" href="banners/create">Create New</a>
 </p>
 
 <QuickGrid Class="table" Items="context.Banners">
@@ -23,9 +23,9 @@
     <PropertyColumn Property="banner => banner.Position" />
 
     <TemplateColumn Context="banner">
-        <a href="@($"banners/edit?id={banner.Id}")">Edit</a> |
-        <a href="@($"banners/details?id={banner.Id}")">Details</a> |
-        <a href="@($"banners/delete?id={banner.Id}")">Delete</a>
+        <a class="btn btn-warning btn-sm me-1" href="@($"banners/edit?id={banner.Id}")">Edit</a>
+        <a class="btn btn-info btn-sm me-1" href="@($"banners/details?id={banner.Id}")">Details</a>
+        <a class="btn btn-danger btn-sm" href="@($"banners/delete?id={banner.Id}")">Delete</a>
     </TemplateColumn>
 </QuickGrid>
 
