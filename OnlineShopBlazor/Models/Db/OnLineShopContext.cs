@@ -6,16 +6,12 @@ namespace OnlineShopBlazor.Models.Db;
 
 public partial class OnLineShopContext : DbContext
 {
-    public OnLineShopContext()
-    {
-    }
+    public OnLineShopContext() { }
 
     public OnLineShopContext(DbContextOptions<OnLineShopContext> options)
-        : base(options)
-    {
-    }
+        : base(options) { }
 
-    public virtual DbSet<Menu> Menus { get; set; }
+    public virtual DbSet<Menu> Menus { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

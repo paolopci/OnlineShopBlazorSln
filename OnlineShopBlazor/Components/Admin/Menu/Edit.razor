@@ -19,28 +19,32 @@ else
     <div class="row">
         <div class="col-md-4">
             <EditForm method="post" Model="Menu" OnValidSubmit="UpdateMenu" FormName="edit" Enhance>
-                <DataAnnotationsValidator />
-                <ValidationSummary role="alert"/>
-                <input type="hidden" name="Menu.Id" value="@Menu.Id" />
-                <div class="mb-3">
-                    <label for="menutitle" class="form-label">MenuTitle:</label>
-                    <InputText id="menutitle" @bind-Value="Menu.MenuTitle" class="form-control" />
-                    <ValidationMessage For="() => Menu.MenuTitle" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="link" class="form-label">Link:</label>
-                    <InputText id="link" @bind-Value="Menu.Link" class="form-control" />
-                    <ValidationMessage For="() => Menu.Link" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="type" class="form-label">Type:</label>
-                    <InputText id="type" @bind-Value="Menu.Type" class="form-control" />
-                    <ValidationMessage For="() => Menu.Type" class="text-danger" />
-                </div>
-                <button type="submit" class="btn btn-primary">Save</button>
-            </EditForm>
-        </div>
-    </div>
+             <DataAnnotationsValidator />
+             <ValidationSummary role="alert" />
+             <input type="hidden" name="Menu.Id" value="@Menu.Id" />
+             <div class="mb-3">
+                 <label for="menutitle" class="form-label">MenuTitle:</label>
+                 <InputText id="menutitle" @bind-Value="Menu.MenuTitle" class="form-control" />
+                 <ValidationMessage For="() => Menu.MenuTitle" class="text-danger" />
+             </div>
+             <div class="mb-3">
+                 <label for="link" class="form-label">Link:</label>
+                 <InputText id="link" @bind-Value="Menu.Link" class="form-control" />
+                 <ValidationMessage For="() => Menu.Link" class="text-danger" />
+             </div>
+             <div class="mb-3">
+                 <label for="type" class="form-label">Type:</label>
+                 @* <InputText id="type" @bind-Value="Menu.Type" class="form-control" /> *@
+                 <InputSelect @bind-Value="Menu.Type" class="form-control">
+                     <option value="Top" selected="@((Menu.Type == "Top")? "selected":null)">Top</option>
+                     <option value="Bottom" selected="@((Menu.Type == "Bottom")? "selected":null)">Bottom</option>
+                 </InputSelect>
+                 <ValidationMessage For="()=> Menu.Type" class="text-danger" />
+             </div>
+             <button type="submit" class="btn btn-primary">Save</button>
+         </EditForm>
+     </div>
+ </div>
 }
 
 <div>
