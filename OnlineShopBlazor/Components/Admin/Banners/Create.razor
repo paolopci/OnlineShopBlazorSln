@@ -14,37 +14,41 @@
     <div class="col-md-4">
         <EditForm method="post" Model="Banner" OnValidSubmit="AddBanner" FormName="create" Enhance>
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
+            <ValidationSummary class="text-danger" role="alert" />
             <div class="mb-3">
-                <label for="title" class="form-label">Title:</label> 
-                <InputText id="title" @bind-Value="Banner.Title" class="form-control" /> 
-                <ValidationMessage For="() => Banner.Title" class="text-danger" /> 
-            </div>        
+                <label for="title" class="form-label">Title:</label>
+                <InputText id="title" @bind-Value="Banner.Title" class="form-control" />
+                <ValidationMessage For="() => Banner.Title" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="subtitle" class="form-label">SubTitle:</label> 
-                <InputText id="subtitle" @bind-Value="Banner.SubTitle" class="form-control" /> 
-                <ValidationMessage For="() => Banner.SubTitle" class="text-danger" /> 
-            </div>        
+                <label for="subtitle" class="form-label">SubTitle:</label>
+                <InputText id="subtitle" @bind-Value="Banner.SubTitle" class="form-control" />
+                <ValidationMessage For="() => Banner.SubTitle" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="imagename" class="form-label">ImageName:</label> 
-                <InputText id="imagename" @bind-Value="Banner.ImageName" class="form-control" /> 
-                <ValidationMessage For="() => Banner.ImageName" class="text-danger" /> 
-            </div>        
+                <label for="imagename" class="form-label">ImageName:</label>
+                <InputText id="imagename" @bind-Value="Banner.ImageName" class="form-control" />
+                <ValidationMessage For="() => Banner.ImageName" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="priority" class="form-label">Priority:</label> 
-                <InputNumber id="priority" @bind-Value="Banner.Priority" class="form-control" /> 
-                <ValidationMessage For="() => Banner.Priority" class="text-danger" /> 
-            </div>        
+                <label for="priority" class="form-label">Priority:</label>
+                <InputNumber id="priority" @bind-Value="Banner.Priority" class="form-control" />
+                <ValidationMessage For="() => Banner.Priority" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="link" class="form-label">Link:</label> 
-                <InputText id="link" @bind-Value="Banner.Link" class="form-control" /> 
-                <ValidationMessage For="() => Banner.Link" class="text-danger" /> 
-            </div>        
+                <label for="link" class="form-label">Link:</label>
+                <InputText id="link" @bind-Value="Banner.Link" class="form-control" />
+                <ValidationMessage For="() => Banner.Link" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="position" class="form-label">Position:</label> 
-                <InputText id="position" @bind-Value="Banner.Position" class="form-control" /> 
-                <ValidationMessage For="() => Banner.Position" class="text-danger" /> 
-            </div>        
+                <label for="position" class="form-label">Position:</label>
+                <InputSelect id="position" @bind-Value="Banner.Position" class="form-control">
+                    <option value="Slider">Slider</option>
+                    <option value="Banner1">Banner 1</option>
+                    <option value="Banner2">Banner 2</option>
+                </InputSelect>
+                <ValidationMessage For="() => Banner.Position" class="text-danger" />
+            </div>
             <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
     </div>
@@ -58,7 +62,8 @@
     [SupplyParameterFromForm]
     private Banner Banner { get; set; } = new();
 
-    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    // To protect from overposting attacks, see
+    // https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddBanner()
     {
         using var context = DbFactory.CreateDbContext();
