@@ -17,12 +17,12 @@
             <ValidationSummary class="text-danger" role="alert" />
             <div class="mb-3">
                 <label for="title" class="form-label">Title:</label>
-                <InputText id="title" @bind-Value="Banner.Title" class="form-control" />
+                <InputTextArea id="title" @bind-Value="Banner.Title" class="form-control" rows="4" />
                 <ValidationMessage For="() => Banner.Title" class="text-danger" />
             </div>
             <div class="mb-3">
                 <label for="subtitle" class="form-label">SubTitle:</label>
-                <InputText id="subtitle" @bind-Value="Banner.SubTitle" class="form-control" />
+                <InputTextArea id="subtitle" @bind-Value="Banner.SubTitle" class="form-control" rows="4" />
                 <ValidationMessage For="() => Banner.SubTitle" class="text-danger" />
             </div>
             <div class="mb-3">
