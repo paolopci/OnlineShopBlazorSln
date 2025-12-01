@@ -2,7 +2,9 @@
 @using Microsoft.EntityFrameworkCore
 @using OnlineShopBlazor.Models.Db
 @inject IDbContextFactory<OnlineShopBlazor.Models.Db.OnLineShopContext> DbFactory
+@inject IWebHostEnvironment Environment
 @inject NavigationManager NavigationManager
+@rendermode InteractiveServer
 
 <PageTitle>Edit</PageTitle>
 
@@ -33,9 +35,21 @@ else
                  <ValidationMessage For="() => Banner.SubTitle" class="text-danger" />
              </div>
              <div class="mb-3">
-                 <label for="imagename" class="form-label">ImageName:</label>
-                 <InputText id="imagename" @bind-Value="Banner.ImageName" class="form-control" />
-                 <ValidationMessage For="() => Banner.ImageName" class="text-danger" />
+                 @* <label for="imagename" class="form-label">ImageName:</label>
+                <InputText id="imagename" @bind-Value="Banner.ImageName" class="form-control" />
+                <ValidationMessage For="() => Banner.ImageName" class="text-danger" /> *@
+                 <InputFile id="imagename" class="form-control" OnChange="LoadFiles" />
+                 @if (previewImage != null)
+                 {
+                     <img src="@previewImage" alt="Preview"
+                         style="max-width: 80px; max-height: 80px; object-fit: cover; border-radius: 4px; margin-top: 5px;" />
+                 }
+                 else if (!string.IsNullOrEmpty(Banner.ImageName))
+                 {
+                     <img src="@($"/images/banners/{Banner.ImageName}")" alt="@Banner.Title"
+                         style="max-width: 80px; max-height: 80px; object-fit: cover; border-radius: 4px; margin-top: 5px;"
+                         onerror="this.style.display='none'" />
+                 }
              </div>
              <div class="mb-3">
                  <label for="priority" class="form-label">Priority:</label>
@@ -76,6 +90,10 @@ else
     [SupplyParameterFromForm]
     private Banner? Banner { get; set; }
 
+    private IBrowserFile? selectedFile;
+    private string? selectedFileName;
+    private string? previewImage;
+
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
@@ -87,10 +105,42 @@ else
         }
     }
 
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+        if (selectedFile != null)
+        {
+            var extension = Path.GetExtension(selectedFile.Name);
+            selectedFileName = $"{Guid.NewGuid()}{extension}";
+
+            // Generate preview
+            var resizedFile = await selectedFile.RequestImageFileAsync(selectedFile.ContentType, 100, 100);
+            var buffer = new byte[resizedFile.Size];
+            await resizedFile.OpenReadStream().ReadAsync(buffer);
+            previewImage = $"data:{selectedFile.ContentType};base64,{Convert.ToBase64String(buffer)}";
+        }
+    }
+
     // To protect from overposting attacks, enable the specific properties you want to bind to.
     // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task UpdateBanner()
     {
+        if (selectedFile != null && !string.IsNullOrEmpty(selectedFileName))
+        {
+            var path = Path.Combine(Environment.WebRootPath, "images", "banners", selectedFileName);
+
+            // Assicurati che la directory esista
+            var directory = Path.GetDirectoryName(path);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory!);
+            }
+
+            await using FileStream fs = new(path, FileMode.Create);
+            await selectedFile.OpenReadStream(maxAllowedSize: 1024 * 1024 * 5).CopyToAsync(fs);
+            Banner!.ImageName = selectedFileName;
+        }
+
         using var context = DbFactory.CreateDbContext();
         context.Attach(Banner!).State = EntityState.Modified;
 

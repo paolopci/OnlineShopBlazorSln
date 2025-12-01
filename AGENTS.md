@@ -45,3 +45,6 @@
 5) Testa e verifica attentamente il codice inserito o modificato.  
 6) Dopo ogni modifica, riformatta i file toccati per mantenere coerenza stilistica.  
    In caso di dubbi, chiarisci prima di redigere la checklist, suddividi gli step complessi ottenendo conferma per ogni sotto-punto e proponi eventuali refactoring solo alla fine.
+
+### Implementation Plan
+- **Lingua**: Il contenuto dell'Implementation Plan deve essere SEMPRE tradotto interamente in ITALIANO.
