@@ -1,8 +1,10 @@
 ﻿@page "/banners/delete"
 @using Microsoft.EntityFrameworkCore
 @using OnlineShopBlazor.Models.Db
+@using System.IO
 @inject IDbContextFactory<OnlineShopBlazor.Models.Db.OnLineShopContext> DbFactory
 @inject NavigationManager NavigationManager
+@inject IWebHostEnvironment Environment
 
 <PageTitle>Delete</PageTitle>
 
@@ -67,6 +69,15 @@
 
     private async Task DeleteBanner()
     {
+        if (!string.IsNullOrEmpty(banner?.ImageName))
+        {
+            var imagePath = Path.Combine(Environment.WebRootPath, "images", "banners", banner.ImageName);
+            if (File.Exists(imagePath))
+            {
+                File.Delete(imagePath);
+            }
+        }
+
         using var context = DbFactory.CreateDbContext();
         context.Banners.Remove(banner!);
         await context.SaveChangesAsync();
