@@ -38,8 +38,7 @@
 
 ### Procedura di modifica
 1) Analizza il progetto e identifica la modifica da eseguire.  
-2) Crea una checklist concettuale (1-7 punti numerati) e presentala prima di procedere, usando checkbox con bordo verde per i punti aperti e bordo giallo barrato per i completati.  
-   - Esempio: `[ ] Punto aperto da completare` / `[x] ~~Punto completato~~`  
+2) Crea una checklist concettuale (1-7 punti numerati) e presentala prima di procedere, usando indicatori grafici con casella verde `🟩 [ ]` per gli step aperti e casella gialla barrata `🟨 [x] ~~...~~` per quelli completati.  
 3) Richiedi conferma per ogni step prima di passare al successivo.  
 4) Dopo ogni modifica o uso di tool, valida l'esito in 1-2 frasi e correggi prima di continuare se serve.  
 5) Testa e verifica attentamente il codice inserito o modificato.  

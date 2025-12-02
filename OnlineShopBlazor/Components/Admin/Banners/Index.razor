@@ -20,7 +20,7 @@
     <TemplateColumn Title="Image" Context="banner">
         @if (!string.IsNullOrEmpty(banner.ImageName))
         {
-            <img src="@($"/images/banners/{banner.ImageName}")" alt="@banner.Title"
+            <img src="@($"/images/banners/{banner.ImageName}")" alt="@banner.Title" title="@banner.ImageName"
                 style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px;"
                 onerror="this.style.display='none'" />
         }
