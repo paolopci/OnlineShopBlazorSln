@@ -1,9 +1,11 @@
 ﻿@page "/"
 @page "/index"
+@using Microsoft.AspNetCore.Components
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.EntityFrameworkCore.Internal
-@inject IDbContextFactory<OnlineShopBlazor.Models.Db.OnLineShopContext> DbContextFactory
 @using System.Data.Common
+@using System.Text.Encodings.Web
+@inject IDbContextFactory<OnlineShopBlazor.Models.Db.OnLineShopContext> DbContextFactory
 
 
 <!--slider area start-->
@@ -17,24 +19,25 @@
             "speed": 300,
             "infinite": true
         }'>
-        @foreach(var slide in Slides)
+        @foreach (var slide in Slides)
         {
             <div class="single_slider d-flex align-items-center" data-bgimg="images/banners/@slide.ImageName">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-6 col-md-7">
-                        <div class="slider_text">
-                            <span>Lookbook</span>
-                            <h1>@slide.Title</h1>
-                            <p>@slide.SubTitle</p>
-                            <a class="btn btn-primary" href="shop.html">Explore Now</a>
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-6 col-md-7">
+                            <div class="slider_text">
+                                <span>Lookbook</span>
+                                <h1>@(RenderMultiline(subTitle: slide.Title))</h1>
+                                <p>@(RenderMultiline(subTitle: slide.SubTitle))</p>
+
+                                <a class="btn btn-primary" href="shop.html">Explore Now</a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
         }
-       @*  <div class="single_slider d-flex align-items-center" data-bgimg="assets/img/slider/1.jpg">
+        @*  <div class="single_slider d-flex align-items-center" data-bgimg="assets/img/slider/1.jpg">
             <div class="container">
                 <div class="row">
                     <div class="col-lg-6 col-md-7">
@@ -3556,8 +3559,23 @@
         using var dbContext = DbContextFactory.CreateDbContext();
         var banners = await dbContext.Banners.ToListAsync();
 
-        Slides = banners.Where(b => b.Position == "Slider").OrderBy(x=>x.Priority).ToList();
-        Banner1 = banners.Where(b => b.Position == "Banner1").OrderBy(x=>x.Priority).ToList();
-        Banner2 = banners.Where(b => b.Position == "Banner2").OrderBy(x=>x.Priority).ToList();
+        Slides = banners.Where(b => b.Position == "Slider").OrderBy(x => x.Priority).ToList();
+        Banner1 = banners.Where(b => b.Position == "Banner1").OrderBy(x => x.Priority).ToList();
+        Banner2 = banners.Where(b => b.Position == "Banner2").OrderBy(x => x.Priority).ToList();
+    }
+
+    private static MarkupString RenderMultiline(string? subTitle)
+    {
+        if (string.IsNullOrWhiteSpace(subTitle))
+        {
+            return new MarkupString(string.Empty);
+        }
+
+        var lines = subTitle.Replace("\r\n", "\n", StringComparison.Ordinal)
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries);
+
+        var encodedLines = lines.Select(line => HtmlEncoder.Default.Encode(line));
+        var joined = string.Join("<br />", encodedLines);
+        return new MarkupString(joined);
     }
 }
