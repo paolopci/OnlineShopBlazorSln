@@ -17,7 +17,24 @@
             "speed": 300,
             "infinite": true
         }'>
-        <div class="single_slider d-flex align-items-center" data-bgimg="assets/img/slider/1.jpg">
+        @foreach(var slide in Slides)
+        {
+            <div class="single_slider d-flex align-items-center" data-bgimg="images/banners/@slide.ImageName">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-6 col-md-7">
+                        <div class="slider_text">
+                            <span>Lookbook</span>
+                            <h1>@slide.Title</h1>
+                            <p>@slide.SubTitle</p>
+                            <a class="btn btn-primary" href="shop.html">Explore Now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        }
+       @*  <div class="single_slider d-flex align-items-center" data-bgimg="assets/img/slider/1.jpg">
             <div class="container">
                 <div class="row">
                     <div class="col-lg-6 col-md-7">
@@ -30,8 +47,8 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="single_slider d-flex align-items-center" data-bgimg="assets/img/slider/2.jpg">
+        </div> *@
+        @* <div class="single_slider d-flex align-items-center" data-bgimg="assets/img/slider/2.jpg">
             <div class="container">
                 <div class="row">
                     <div class="col-lg-6 col-md-7">
@@ -58,7 +75,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> *@
     </div>
 </section>
 <!--slider area end-->
