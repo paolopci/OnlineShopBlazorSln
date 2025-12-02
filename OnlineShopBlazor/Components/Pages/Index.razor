@@ -100,21 +100,20 @@
             <h2>featured collections</h2>
         </div>
         <div class="banner_container d-flex">
-            <figure class="single_banner position-relative mr-30">
-                <img src="assets/img/bg/bg1.jpg" alt="">
-                <figcaption class="banner_text position-absolute">
-                    <h3>Zara Pattern <br> backpacks</h3>
-                    <p>Stretch, fresh-cool help you alway <br> comfortable</p>
-                    <a class="btn btn-primary" href="shop.html">Shop Now</a>
-                </figcaption>
-            </figure>
-            <figure class="single_banner position-relative">
-                <img src="assets/img/bg/bg2.jpg" alt="">
-                <figcaption class="banner_text position-absolute">
-                    <h3 class="text-white">Basic Color Caps</h3>
-                    <p class="text-white">Minimalist never cool, choose and make <br> the simple great again!</p>
-                </figcaption>
-            </figure>
+            @foreach (var item in Banner1)
+            {
+                <figure class="single_banner position-relative mr-30">
+                    <img src="images/banners/@item.ImageName" alt="">
+                    <figcaption class="banner_text position-absolute">
+                        <h3>@(RenderMultiline(subTitle: item.Title))</h3>
+                        <p>@(RenderMultiline(subTitle: item.SubTitle))</p>
+                        @if (!string.IsNullOrEmpty(item.Link))
+                        {
+                            <a class="btn btn-primary" href="@item.Link">Explore Now</a>
+                        }
+                    </figcaption>
+                </figure>
+            }
         </div>
     </div>
 </section>
