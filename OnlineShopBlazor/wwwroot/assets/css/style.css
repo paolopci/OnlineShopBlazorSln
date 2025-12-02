@@ -2636,6 +2636,9 @@ input:-ms-input-placeholder, textarea:-ms-input-placeholder {
   top: 66px;
   left: 65px;
   right: 18px;
+  bottom: 30px;
+  display: flex;
+  flex-direction: column;
 }
 @media only screen and (min-width: 992px) and (max-width: 1199px) {
   .banner_text {
@@ -2701,22 +2704,8 @@ input:-ms-input-placeholder, textarea:-ms-input-placeholder {
   }
 }
 .banner_text a.btn-primary {
-  margin-top: 198px;
-}
-@media only screen and (min-width: 992px) and (max-width: 1199px) {
-  .banner_text a.btn-primary {
-    margin-top: 135px;
-  }
-}
-@media only screen and (min-width: 768px) and (max-width: 991px) {
-  .banner_text a.btn-primary {
-    margin-top: 40px;
-  }
-}
-@media only screen and (max-width: 767px) {
-  .banner_text a.btn-primary {
-    margin-top: 30px;
-  }
+  margin-top: auto;
+  align-self: flex-start;
 }
 .banner_text a.btn-primary:hover {
   color: #000000;
