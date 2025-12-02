@@ -4,7 +4,9 @@
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.EntityFrameworkCore.Internal
 @using System.Data.Common
+@using System.Text
 @using System.Text.Encodings.Web
+@using System.Text.RegularExpressions
 @inject IDbContextFactory<OnlineShopBlazor.Models.Db.OnLineShopContext> DbContextFactory
 
 
@@ -1802,7 +1804,24 @@
 <section class="banner_section banner_style2 mb-109">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-lg-6 col-md-6 col-sm-6">
+            @foreach (var item2 in Banner2)
+            {
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                    <figure class="single_banner position-relative">
+                        <img src="images/banners/@item2.ImageName" alt="">
+                        <div class="banner_text position-absolute">
+                            <h3>@(RenderMultiline(subTitle: item2.Title))</h3>
+                            <p>@(RenderMultiline(subTitle: item2.SubTitle))</p>
+                            @if (!string.IsNullOrEmpty(item2.Link))
+                            {
+                                <a class="btn btn-primary" href="@item2.Link">Explore Now</a>
+                            }
+                        </div>
+
+                    </figure>
+                </div>
+            }
+            @* <div class="col-lg-6 col-md-6 col-sm-6">
                 <figure class="single_banner position-relative">
                     <img src="assets/img/bg/bg3.jpg" alt="">
                     <div class="banner_text position-absolute">
@@ -1823,7 +1842,7 @@
                     </div>
 
                 </figure>
-            </div>
+            </div> *@
         </div>
     </div>
 </section>
@@ -3532,10 +3551,44 @@
         }
 
         var lines = subTitle.Replace("\r\n", "\n", StringComparison.Ordinal)
-        .Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries);
 
-        var encodedLines = lines.Select(line => HtmlEncoder.Default.Encode(line));
+        var encodedLines = lines.Select(EncodeLineWithHighlight);
         var joined = string.Join("<br />", encodedLines);
         return new MarkupString(joined);
     }
+
+    private static string EncodeLineWithHighlight(string line)
+    {
+        if (string.IsNullOrEmpty(line))
+        {
+            return string.Empty;
+        }
+
+        var sb = new StringBuilder();
+        var lastIndex = 0;
+
+        foreach (Match match in HighlightRegex.Matches(line))
+        {
+            if (match.Index > lastIndex)
+            {
+                var plainSegment = line[lastIndex..match.Index];
+                sb.Append(HtmlEncoder.Default.Encode(plainSegment));
+            }
+
+            var highlighted = HtmlEncoder.Default.Encode(match.Groups[1].Value);
+            sb.Append($"<span class=\"banner-highlight\">{highlighted}</span>");
+            lastIndex = match.Index + match.Length;
+        }
+
+        if (lastIndex < line.Length)
+        {
+            var remaining = line[lastIndex..];
+            sb.Append(HtmlEncoder.Default.Encode(remaining));
+        }
+
+        return sb.ToString();
+    }
+
+    private static readonly Regex HighlightRegex = new("<span>(.*?)</span>", RegexOptions.IgnoreCase | RegexOptions.Singleline);
 }

@@ -2670,6 +2670,10 @@ input:-ms-input-placeholder, textarea:-ms-input-placeholder {
   font-weight: 600;
   color: #ff2f2f;
 }
+.banner_text .banner-highlight {
+  color: #ff2f2f;
+  font-weight: 600;
+}
 @media only screen and (min-width: 992px) and (max-width: 1199px) {
   .banner_text h3 {
     font-size: 28px;
