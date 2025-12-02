@@ -29,56 +29,17 @@
                                 <span>Lookbook</span>
                                 <h1>@(RenderMultiline(subTitle: slide.Title))</h1>
                                 <p>@(RenderMultiline(subTitle: slide.SubTitle))</p>
+                                @if (!string.IsNullOrEmpty(slide.Link))
+                                {
+                                    <a class="btn btn-primary" href="@slide.Link">Explore Now</a>
+                                }
 
-                                <a class="btn btn-primary" href="shop.html">Explore Now</a>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         }
-        @*  <div class="single_slider d-flex align-items-center" data-bgimg="assets/img/slider/1.jpg">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-6 col-md-7">
-                        <div class="slider_text">
-                            <span>Lookbook</span>
-                            <h1>fashion trend for autum mans with vibes</h1>
-                            <p>We love seeing how our Aslam wearers like <br> to wear their Norda</p>
-                            <a class="btn btn-primary" href="shop.html">Explore Now</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> *@
-        @* <div class="single_slider d-flex align-items-center" data-bgimg="assets/img/slider/2.jpg">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-6 col-md-7">
-                        <div class="slider_text">
-                            <span>Lookbook</span>
-                            <h1>fashion trend for autum mans with vibes</h1>
-                            <p>We love seeing how our Aslam wearers like <br> to wear their Norda</p>
-                            <a class="btn btn-primary" href="shop.html">Explore Now</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="single_slider d-flex align-items-center" data-bgimg="assets/img/slider/3.jpg">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-6 col-md-7">
-                        <div class="slider_text">
-                            <span>Lookbook</span>
-                            <h1>fashion trend for autum girls with vibes</h1>
-                            <p>We love seeing how our Aslam wearers like <br> to wear their Norda</p>
-                            <a class="btn btn-primary" href="shop.html">Explore Now</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> *@
     </div>
 </section>
 <!--slider area end-->
@@ -3572,7 +3533,7 @@
         }
 
         var lines = subTitle.Replace("\r\n", "\n", StringComparison.Ordinal)
-            .Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        .Split('\n', StringSplitOptions.RemoveEmptyEntries);
 
         var encodedLines = lines.Select(line => HtmlEncoder.Default.Encode(line));
         var joined = string.Join("<br />", encodedLines);
