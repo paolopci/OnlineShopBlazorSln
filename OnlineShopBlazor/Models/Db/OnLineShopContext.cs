@@ -15,9 +15,14 @@ public partial class OnLineShopContext : DbContext
     {
     }
 
-    public virtual DbSet<Banner> Banners { get; set; } = null!;
+    public virtual DbSet<Banner> Banners { get; set; }
 
-    public virtual DbSet<Menu> Menus { get; set; } = null!;
+    public virtual DbSet<Menu> Menus { get; set; }
+
+    public virtual DbSet<Product> Products { get; set; }
+
+    public virtual DbSet<ProductGallery> ProductGalleries { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -29,6 +34,16 @@ public partial class OnLineShopContext : DbContext
         modelBuilder.Entity<Menu>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_Menus_ID");
+        });
+
+        modelBuilder.Entity<Product>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_Products_Id");
+        });
+
+        modelBuilder.Entity<ProductGallery>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_ProductGallery_Id");
         });
 
         OnModelCreatingPartial(modelBuilder);
