@@ -1,0 +1,42 @@
+﻿@page "/products"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using OnlineShopBlazor.Models.Db
+@implements IAsyncDisposable
+@inject IDbContextFactory<OnlineShopBlazor.Models.Db.OnLineShopContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="products/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Products">
+    <PropertyColumn Property="product => product.Title" />
+    <PropertyColumn Property="product => product.Description" />
+    <PropertyColumn Property="product => product.FullDesc" />
+    <PropertyColumn Property="product => product.Price" />
+    <PropertyColumn Property="product => product.Discount" />
+    <PropertyColumn Property="product => product.Qty" />
+    <PropertyColumn Property="product => product.Tags" />
+    <PropertyColumn Property="product => product.VideoUrl" />
+
+    <TemplateColumn Context="product">
+        <a href="@($"products/edit?id={product.Id}")">Edit</a> |
+        <a href="@($"products/details?id={product.Id}")">Details</a> |
+        <a href="@($"products/delete?id={product.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private OnLineShopContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

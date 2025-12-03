@@ -1821,28 +1821,6 @@
                     </figure>
                 </div>
             }
-            @* <div class="col-lg-6 col-md-6 col-sm-6">
-                <figure class="single_banner position-relative">
-                    <img src="assets/img/bg/bg3.jpg" alt="">
-                    <div class="banner_text position-absolute">
-                        <h3>Minimalist <br> sneaker</h3>
-                        <p>Stretch, fresh-cool help you alway <br> comfortable</p>
-                        <a class="btn btn-primary" href="shop.html">Shop Now</a>
-                    </div>
-
-                </figure>
-            </div>
-            <div class="col-lg-6 col-md-6 col-sm-6">
-                <figure class="single_banner position-relative">
-                    <img src="assets/img/bg/bg4.jpg" alt="">
-                    <div class="banner_text position-absolute text__style2">
-                        <h3><span>50%</span> OFF <br> for Autumn</h3>
-                        <p>Stretch, fresh-cool help you alway <br> comfortable</p>
-                        <a class="btn btn-primary" href="shop.html">Shop Now</a>
-                    </div>
-
-                </figure>
-            </div> *@
         </div>
     </div>
 </section>
@@ -3551,7 +3529,7 @@
         }
 
         var lines = subTitle.Replace("\r\n", "\n", StringComparison.Ordinal)
-            .Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        .Split('\n', StringSplitOptions.RemoveEmptyEntries);
 
         var encodedLines = lines.Select(EncodeLineWithHighlight);
         var joined = string.Join("<br />", encodedLines);
@@ -3590,5 +3568,6 @@
         return sb.ToString();
     }
 
-    private static readonly Regex HighlightRegex = new("<span>(.*?)</span>", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+    private static readonly Regex HighlightRegex = new("<span>(.*?)</span>", RegexOptions.IgnoreCase |
+    RegexOptions.Singleline);
 }

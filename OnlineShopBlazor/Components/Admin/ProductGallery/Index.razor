@@ -1,0 +1,36 @@
+﻿@page "/productgalleries"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using OnlineShopBlazor.Models.Db
+@implements IAsyncDisposable
+@inject IDbContextFactory<OnlineShopBlazor.Models.Db.OnLineShopContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="productgalleries/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.ProductGalleries">
+    <PropertyColumn Property="productgallery => productgallery.ProductId" />
+    <PropertyColumn Property="productgallery => productgallery.ImageName" />
+
+    <TemplateColumn Context="productgallery">
+        <a href="@($"productgalleries/edit?id={productgallery.Id}")">Edit</a> |
+        <a href="@($"productgalleries/details?id={productgallery.Id}")">Details</a> |
+        <a href="@($"productgalleries/delete?id={productgallery.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private OnLineShopContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}
