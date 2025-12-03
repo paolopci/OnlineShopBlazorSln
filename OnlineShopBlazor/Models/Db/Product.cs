@@ -26,6 +26,9 @@ public partial class Product
     [Column(TypeName = "money")]
     public decimal? Discount { get; set; }
 
+    [StringLength(50)]
+    public string? ImageName { get; set; }
+
     public int? Qty { get; set; }
 
     [StringLength(1000)]
