@@ -14,47 +14,47 @@
     <div class="col-md-4">
         <EditForm method="post" Model="Product" OnValidSubmit="AddProduct" FormName="create" Enhance>
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
+            <ValidationSummary class="text-danger" role="alert" />
             <div class="mb-3">
-                <label for="title" class="form-label">Title:</label> 
-                <InputText id="title" @bind-Value="Product.Title" class="form-control" /> 
-                <ValidationMessage For="() => Product.Title" class="text-danger" /> 
-            </div>        
+                <label for="title" class="form-label">Title:</label>
+                <InputText id="title" @bind-Value="Product.Title" class="form-control" />
+                <ValidationMessage For="() => Product.Title" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="description" class="form-label">Description:</label> 
-                <InputText id="description" @bind-Value="Product.Description" class="form-control" /> 
-                <ValidationMessage For="() => Product.Description" class="text-danger" /> 
-            </div>        
+                <label for="description" class="form-label">Description:</label>
+                <InputText id="description" @bind-Value="Product.Description" class="form-control" />
+                <ValidationMessage For="() => Product.Description" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="fulldesc" class="form-label">FullDesc:</label> 
-                <InputText id="fulldesc" @bind-Value="Product.FullDesc" class="form-control" /> 
-                <ValidationMessage For="() => Product.FullDesc" class="text-danger" /> 
-            </div>        
+                <label for="fulldesc" class="form-label">FullDesc:</label>
+                <InputTextArea id="fulldesc" @bind-Value="Product.FullDesc" class="form-control" Rows="4" />
+                <ValidationMessage For="() => Product.FullDesc" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="price" class="form-label">Price:</label> 
-                <InputNumber id="price" @bind-Value="Product.Price" class="form-control" /> 
-                <ValidationMessage For="() => Product.Price" class="text-danger" /> 
-            </div>        
+                <label for="price" class="form-label">Price:</label>
+                <InputNumber id="price" @bind-Value="Product.Price" class="form-control" />
+                <ValidationMessage For="() => Product.Price" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="discount" class="form-label">Discount:</label> 
-                <InputNumber id="discount" @bind-Value="Product.Discount" class="form-control" /> 
-                <ValidationMessage For="() => Product.Discount" class="text-danger" /> 
-            </div>        
+                <label for="discount" class="form-label">Discount:</label>
+                <InputNumber id="discount" @bind-Value="Product.Discount" class="form-control" />
+                <ValidationMessage For="() => Product.Discount" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="qty" class="form-label">Qty:</label> 
-                <InputNumber id="qty" @bind-Value="Product.Qty" class="form-control" /> 
-                <ValidationMessage For="() => Product.Qty" class="text-danger" /> 
-            </div>        
+                <label for="qty" class="form-label">Qty:</label>
+                <InputNumber id="qty" @bind-Value="Product.Qty" class="form-control" />
+                <ValidationMessage For="() => Product.Qty" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="tags" class="form-label">Tags:</label> 
-                <InputText id="tags" @bind-Value="Product.Tags" class="form-control" /> 
-                <ValidationMessage For="() => Product.Tags" class="text-danger" /> 
-            </div>        
+                <label for="tags" class="form-label">Tags:</label>
+                <InputText id="tags" @bind-Value="Product.Tags" class="form-control" />
+                <ValidationMessage For="() => Product.Tags" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="videourl" class="form-label">VideoUrl:</label> 
-                <InputText id="videourl" @bind-Value="Product.VideoUrl" class="form-control" /> 
-                <ValidationMessage For="() => Product.VideoUrl" class="text-danger" /> 
-            </div>        
+                <label for="videourl" class="form-label">VideoUrl:</label>
+                <InputText id="videourl" @bind-Value="Product.VideoUrl" class="form-control" />
+                <ValidationMessage For="() => Product.VideoUrl" class="text-danger" />
+            </div>
             <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
     </div>
@@ -68,7 +68,8 @@
     [SupplyParameterFromForm]
     private Product Product { get; set; } = new();
 
-    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    // To protect from overposting attacks, see
+    //https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddProduct()
     {
         using var context = DbFactory.CreateDbContext();
