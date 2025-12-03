@@ -1,0 +1,15 @@
+Comandi per installare i tool MCP globali su una nuova macchina:
+
+1. Server filesystem
+   npm install -g mcp-server-filesystem
+
+2. Server MSSQL
+   npm install -g mssql-mcp-server
+
+3. Server MongoDB
+   npm install -g mongodb-mcp-server
+
+4. Server Radzen/Blazor helper
+   dotnet tool install -g Radzen.Mcp
+
+Eseguire gli stessi comandi con `update` (es. `dotnet tool update -g Radzen.Mcp`) se i tool risultano già installati ma vanno aggiornati.

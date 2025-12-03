@@ -13,6 +13,12 @@
 - Live reload: `dotnet watch --project OnlineShopBlazor` for iterative UI changes.
 - Tests: none present; once added, run with `dotnet test`.
 
+## MCP Server Configuration
+- Configurazione centralizzata in `.vscode/mcp.json`; mantenere aggiornata la lista dei server usati nel progetto.
+- Server attuali: `filesystem`, `mssql-local`, `mongo`, `dotnet-blazor-helper` (collegato al tool `radzen.mcp`).
+- Prima di avviare un server installare il relativo tool (es. `dotnet tool install -g Radzen.Mcp`) e verificare che il comando sia nel `PATH`.
+- Rimuovere o aggiornare le voci per i server non installati, altrimenti resteranno in stato `Stopped` in VS Code.
+
 ## Coding Style & Naming Conventions
 - C# with 4-space indentation; keep files ASCII.
 - Naming: PascalCase for classes/components/files (e.g., `Home.razor`), camelCase for locals/parameters, UPPER_SNAKE_CASE for constants.
@@ -38,7 +44,7 @@
 
 ### Procedura di modifica
 1) Analizza il progetto e identifica la modifica da eseguire.  
-2) Crea una checklist concettuale (1-7 punti numerati) e presentala prima di procedere, usando indicatori grafici con casella verde `🟩 [ ]` per gli step aperti e casella gialla barrata `🟨 [x] ~~...~~` per quelli completati.  
+2) Crea una checklist concettuale (1-7 punti numerati) e presentala prima di procedere, usando indicatori grafici con casella verde `🟩` per gli step aperti e casella gialla barrata `🟨 ~~...~~` per quelli completati.  
 3) Richiedi conferma per ogni step prima di passare al successivo.  
 4) Dopo ogni modifica o uso di tool, valida l'esito in 1-2 frasi e correggi prima di continuare se serve.  
 5) Testa e verifica attentamente il codice inserito o modificato.  
