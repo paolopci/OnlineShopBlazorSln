@@ -42,9 +42,13 @@
             </div>
             <div class="mb-3">
                 <label for="imagename" class="form-label">ImageName:</label>
-                <InputText id="imagename" @bind-Value="Product.ImageName" class="form-control" />
-                <ValidationMessage For="() => Product.ImageName" class="text-danger" />
+                <InputFile id="imagename" @bind-Value="Product.ImageName" class="form-control" />
             </div>
+            <div class="mb-3">
+                <label for="Galleryimagesname" class="form-label">Gallery ImageName:</label>
+                <InputFile id="Galleryimagesname" @bind-Value="Product.ImageName" class="form-control" multiple />
+            </div>
+
             <div class="mb-3">
                 <label for="qty" class="form-label">Qty:</label>
                 <InputNumber id="qty" @bind-Value="Product.Qty" class="form-control" />
