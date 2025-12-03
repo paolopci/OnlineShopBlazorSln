@@ -1,0 +1,168 @@
+﻿@page "/banners/edit"
+@using Microsoft.EntityFrameworkCore
+@using OnlineShopBlazor.Models.Db
+@inject IDbContextFactory<OnlineShopBlazor.Models.Db.OnLineShopContext> DbFactory
+@inject IWebHostEnvironment Environment
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Banner</h2>
+<hr />
+@if (Banner is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Banner" OnValidSubmit="UpdateBanner" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert" />
+                <input type="hidden" name="Banner.Id" value="@Banner.Id" />
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title:</label>
+                    <InputTextArea id="title" @bind-Value="Banner.Title" class="form-control" rows="4" />
+                    <ValidationMessage For="() => Banner.Title" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="subtitle" class="form-label">SubTitle:</label>
+                    <InputTextArea id="subtitle" @bind-Value="Banner.SubTitle" class="form-control" rows="4" />
+                    <ValidationMessage For="() => Banner.SubTitle" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <InputFile id="imagename" class="form-control" OnChange="LoadFiles" />
+                    @if (previewImage != null)
+                    {
+                        <img src="@previewImage" alt="Preview"
+                            style="max-width: 80px; max-height: 80px; object-fit: cover; border-radius: 4px; margin-top: 5px;" />
+                    }
+                    else if (!string.IsNullOrEmpty(Banner.ImageName))
+                    {
+                        <img src="@($"/images/banners/{Banner.ImageName}")" alt="@Banner.Title"
+                            style="max-width: 80px; max-height: 80px; object-fit: cover; border-radius: 4px; margin-top: 5px;"
+                            onerror="this.style.display='none'" />
+                    }
+                </div>
+                <div class="mb-3">
+                    <label for="priority" class="form-label">Priority:</label>
+                    <InputNumber id="priority" @bind-Value="Banner.Priority" class="form-control" />
+                    <ValidationMessage For="() => Banner.Priority" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="link" class="form-label">Link:</label>
+                    <InputText id="link" @bind-Value="Banner.Link" class="form-control" />
+                    <ValidationMessage For="() => Banner.Link" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="position" class="form-label">Position:</label>
+                    <InputSelect id="position" @bind-Value="Banner.Position" class="form-control">
+                        <option value="Slider" selected="@((Banner.Position == "Slider") ? "selected" : null)">Slider
+                        </option>
+                        <option value="Banner1" selected="@((Banner.Position == "Banner1") ? "selected" : null)">Banner 1
+                        </option>
+                        <option value="Banner2" selected="@((Banner.Position == "Banner2") ? "selected" : null)">Banner 2
+                        </option>
+                    </InputSelect>
+                    <ValidationMessage For="() => Banner.Position" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/banners">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private Banner? Banner { get; set; }
+
+    private IBrowserFile? selectedFile;
+    private string? selectedFileName;
+    private string? previewImage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Banner ??= await context.Banners.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (Banner is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+        if (selectedFile != null)
+        {
+            var extension = Path.GetExtension(selectedFile.Name);
+            selectedFileName = $"{Guid.NewGuid()}{extension}";
+
+            // Generate preview
+            var resizedFile = await selectedFile.RequestImageFileAsync(selectedFile.ContentType, 100, 100);
+            var buffer = new byte[resizedFile.Size];
+            await resizedFile.OpenReadStream().ReadAsync(buffer);
+            previewImage = $"data:{selectedFile.ContentType};base64,{Convert.ToBase64String(buffer)}";
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateBanner()
+    {
+        if (selectedFile != null && !string.IsNullOrEmpty(selectedFileName))
+        {
+            var path = Path.Combine(Environment.WebRootPath, "images", "banners", selectedFileName);
+
+            // Assicurati che la directory esista
+            var directory = Path.GetDirectoryName(path);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory!);
+            }
+
+            await using FileStream fs = new(path, FileMode.Create);
+            await selectedFile.OpenReadStream(maxAllowedSize: 1024 * 1024 * 5).CopyToAsync(fs);
+            Banner!.ImageName = selectedFileName;
+        }
+
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Banner!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!BannerExists(Banner!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/banners");
+    }
+
+    private bool BannerExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Banners.Any(e => e.Id == id);
+    }
+}

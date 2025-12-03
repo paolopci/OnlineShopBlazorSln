@@ -1,0 +1,48 @@
+﻿@page "/banners"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using OnlineShopBlazor.Models.Db
+
+@implements IAsyncDisposable
+@inject IDbContextFactory<OnlineShopBlazor.Models.Db.OnLineShopContext> DbFactory
+
+<PageTitle>Banners</PageTitle>
+
+<h1>Banners</h1>
+
+<p>
+    <a class="btn btn-success p-1" href="banners/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Banners">
+    <PropertyColumn Property="banner => banner.Title" />
+    <PropertyColumn Property="banner => banner.SubTitle" />
+    <TemplateColumn Title="Image" Context="banner">
+        @if (!string.IsNullOrEmpty(banner.ImageName))
+        {
+            <img src="@($"/images/banners/{banner.ImageName}")" alt="@banner.Title" title="@banner.ImageName"
+                style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px;"
+                onerror="this.style.display='none'" />
+        }
+    </TemplateColumn>
+    <PropertyColumn Property="banner => banner.Priority" />
+    <PropertyColumn Property="banner => banner.Link" />
+    <PropertyColumn Property="banner => banner.Position" />
+
+    <TemplateColumn Context="banner">
+        <a class="btn btn-warning btn-sm me-1" href="@($"banners/edit?id={banner.Id}")">Edit</a>
+        <a class="btn btn-info btn-sm me-1" href="@($"banners/details?id={banner.Id}")">Details</a>
+        <a class="btn btn-danger btn-sm" href="@($"banners/delete?id={banner.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private OnLineShopContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}
