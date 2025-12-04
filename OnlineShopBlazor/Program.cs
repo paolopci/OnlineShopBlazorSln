@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter;
+using Radzen;
 using Microsoft.EntityFrameworkCore;
 using OnlineShopBlazor.Components;
 using OnlineShopBlazor.Models.Db;
@@ -10,6 +11,7 @@ builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddDbContextFactory<OnLineShopContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("OnlineShopDb")));
 builder.Services.AddQuickGridEntityFrameworkAdapter();
+builder.Services.AddRadzenComponents();
 
 var app = builder.Build();
 
