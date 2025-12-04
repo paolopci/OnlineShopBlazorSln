@@ -7,54 +7,247 @@
 
 <PageTitle>Products</PageTitle>
 
+
 <h1>Products</h1>
 
 <p>
     <a class="btn btn-success p-1" href="products/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Products">
-    <PropertyColumn Property="product => product.Title" />
-    <PropertyColumn Property="product => product.Description" />
-    <TemplateColumn Title="FullDesc" Class="full-desc-col" Context="product">
-        <span class="full-desc-text text-truncate" title="@product.FullDesc">
-            @GetFullDescPreview(product.FullDesc)
-        </span>
-    </TemplateColumn>
-    <PropertyColumn Property="product => product.Price" />
-    <PropertyColumn Property="product => product.Discount" />
-    <PropertyColumn Property="product => product.Qty" />
-    <PropertyColumn Property="product => product.Tags" />
-    <PropertyColumn Property="product => product.VideoUrl" />
+<div class="d-none d-md-block">
+    <QuickGrid Class="table" Items="context.Products">
+        <PropertyColumn Property="product => product.Title" />
+        <PropertyColumn Property="product => product.Description" />
+        <TemplateColumn Title="FullDesc" Class="full-desc-col" Context="product">
+            <span class="full-desc-text text-truncate" title="@product.FullDesc">
+                @GetFullDescPreview(product.FullDesc)
+            </span>
+        </TemplateColumn>
+        <PropertyColumn Property="product => product.Price" />
+        <PropertyColumn Property="product => product.Discount" />
+        <PropertyColumn Property="product => product.Qty" />
+        <PropertyColumn Property="product => product.Tags" />
+        <PropertyColumn Property="product => product.VideoUrl" />
 
-    <TemplateColumn Context="product">
-        <a class="btn btn-warning btn-sm me-1" href="@($"products/edit?id={product.Id}")">Edit</a>
-        <a class="btn btn-info btn-sm me-1" href="@($"products/details?id={product.Id}")">Details</a>
-        <a class="btn btn-danger btn-sm" href="@($"products/delete?id={product.Id}")">Delete</a>
-    </TemplateColumn>
-</QuickGrid>
+        <TemplateColumn Context="product">
+            <a class="btn btn-warning btn-sm me-1" href="@($"products/edit?id={product.Id}")">Edit</a>
+            <a class="btn btn-info btn-sm me-1" href="@($"products/details?id={product.Id}")">Details</a>
+            <a class="btn btn-danger btn-sm" href="@($"products/delete?id={product.Id}")">Delete</a>
+        </TemplateColumn>
+    </QuickGrid>
+</div>
+
+<div class="d-md-none">
+    @foreach (var product in context.Products)
+
+
+
+
+
+
+
+    {
+        <div class="card mb-3 shadow-sm">
+            @if (!string.IsNullOrWhiteSpace(product.ImageName))
+
+
+
+
+
+
+
+            {
+                <img src="@($"/images/products/{product.ImageName}")" class="card-img-top" alt="@product.Title"
+                    style="max-height: 200px; object-fit: cover;">
+            }
+            <div class="card-body">
+                <h5 class="card-title">@product.Title</h5>
+                <p class="card-text text-muted small">@product.Description</p>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold text-primary">@product.Price?.ToString("C")</span>
+                    @if (product.Discount > 0)
+                    {
+                        <span class="badge bg-danger">-@product.Discount%</span>
+                    }
+                </div>
+                <div class="d-grid gap-2">
+                    <a class="btn btn-warning" href="@($"products/edit?id={product.Id}")">Edit</a>
+                    <a class="btn btn-info" href="@($"products/details?id={product.Id}")">Details</a>
+                    <a class="btn btn-danger" href="@($"products/delete?id={product.Id}")">Delete</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
 
 @code {
     private OnLineShopContext context = default!;
+
+
+
+
+
+
+
     private const int FullDescPreviewLength = 60;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     protected override void OnInitialized()
+
+
+
+
+
+
+
     {
+
+
+
+
+
+
+
         context = DbFactory.CreateDbContext();
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     private static string GetFullDescPreview(string? fullDesc)
+
+
+
+
+
+
+
     {
+
+
+
+
+
+
+
         if (string.IsNullOrWhiteSpace(fullDesc))
+
+
+
+
+
+
+
         {
+
+
+
+
+
+
+
             return string.Empty;
+
+
+
+
+
+
+
         }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         var normalized = fullDesc.Trim();
+
+
+
+
+
+
+
         return normalized.Length <= FullDescPreviewLength
-            ? normalized
-            : $"{normalized[..FullDescPreviewLength]}...";
+
+
+
+
+
+
+
+        ? normalized
+
+
+
+
+
+
+
+        : $"{normalized[..FullDescPreviewLength]}...";
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public async ValueTask DisposeAsync() => await context.DisposeAsync();
 }
