@@ -58,7 +58,12 @@ else
                 </div>
                 <div class="mb-3">
                     <label for="imagename" class="form-label">ImageName:</label>
-                    <InputFile id="imagename" OnChange="HandlePrimaryImageChange" class="form-control" />
+                    <div class="primary-image-current">
+                        @(string.IsNullOrWhiteSpace(Product.ImageName) ? "Nessuna immagine salvata" : Product.ImageName)
+                    </div>
+                    <div class="primary-image-input">
+                        <InputFile id="imagename" OnChange="HandlePrimaryImageChange" class="primary-image-input__file" />
+                    </div>
                     <ValidationMessage For="() => Product.ImageName" class="text-danger" />
                 </div>
                 <div class="mb-3">
@@ -117,6 +122,7 @@ else
     private readonly List<GalleryUpload> GalleryUploads = new();
 
     private bool ReplaceGalleryRequested { get; set; }
+    private string? OriginalImageName { get; set; }
     private string? UploadError { get; set; }
 
     private const long MaxUploadSize = 1024 * 1024 * 5;
@@ -130,6 +136,7 @@ else
         using var context = DbFactory.CreateDbContext();
         Product ??= await context.Products.FirstOrDefaultAsync(m => m.Id == Id);
         GalleryImages = await context.ProductGalleries.Where(g => g.ProductId == Id).ToListAsync();
+        OriginalImageName = Product?.ImageName;
 
         if (Product is null)
         {
@@ -219,9 +226,19 @@ else
             Directory.CreateDirectory(imagesDirectory);
         }
 
+        if (!string.IsNullOrWhiteSpace(OriginalImageName) && !string.Equals(OriginalImageName, Product.ImageName, StringComparison.OrdinalIgnoreCase))
+        {
+            var originalPath = Path.Combine(imagesDirectory, OriginalImageName);
+            if (File.Exists(originalPath))
+            {
+                File.Delete(originalPath);
+            }
+        }
+
         var filePath = Path.Combine(imagesDirectory, Product!.ImageName);
         await using FileStream fs = new(filePath, FileMode.Create);
         await PrimaryImageFile.OpenReadStream(MaxUploadSize).CopyToAsync(fs);
+        OriginalImageName = Product.ImageName;
     }
 
     private void HandleGalleryImagesChange(InputFileChangeEventArgs args)
