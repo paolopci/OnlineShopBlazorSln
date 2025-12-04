@@ -16,7 +16,11 @@
 <QuickGrid Class="table" Items="context.Products">
     <PropertyColumn Property="product => product.Title" />
     <PropertyColumn Property="product => product.Description" />
-    <PropertyColumn Property="product => product.FullDesc" />
+    <TemplateColumn Title="FullDesc" Class="full-desc-col" Context="product">
+        <span class="full-desc-text text-truncate" title="@product.FullDesc">
+            @GetFullDescPreview(product.FullDesc)
+        </span>
+    </TemplateColumn>
     <PropertyColumn Property="product => product.Price" />
     <PropertyColumn Property="product => product.Discount" />
     <PropertyColumn Property="product => product.Qty" />
@@ -32,10 +36,24 @@
 
 @code {
     private OnLineShopContext context = default!;
+    private const int FullDescPreviewLength = 120;
 
     protected override void OnInitialized()
     {
         context = DbFactory.CreateDbContext();
+    }
+
+    private static string GetFullDescPreview(string? fullDesc)
+    {
+        if (string.IsNullOrWhiteSpace(fullDesc))
+        {
+            return string.Empty;
+        }
+
+        var normalized = fullDesc.Trim();
+        return normalized.Length <= FullDescPreviewLength
+            ? normalized
+            : $"{normalized[..FullDescPreviewLength]}...";
     }
 
     public async ValueTask DisposeAsync() => await context.DisposeAsync();
