@@ -6,11 +6,7 @@
     word-break: break-word;
 }
 
-.full-desc-editor ::deep .rz-html-editor-content {
-    max-height: 6rem;
-    min-height: 6rem;
-    overflow-y: auto;
-}
+
 
 .full-desc-editor ::deep .rz-html-editor-editable {
     line-height: 1.5;
@@ -23,7 +19,7 @@
     background-color: #f8f9fa;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     padding: 0.5rem;
     margin-bottom: 0.25rem;
 }
@@ -50,6 +46,7 @@
     flex: 1;
     color: #6c757d;
 }
+
 .gallery-row {
     display: flex;
     flex-direction: column;
