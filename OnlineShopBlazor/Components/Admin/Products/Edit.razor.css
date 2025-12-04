@@ -1,0 +1,5 @@
+.rich-text-editor {
+    min-height: 200px;
+    padding: 0.75rem;
+    overflow-y: auto;
+}

@@ -1,8 +1,14 @@
 ﻿@page "/products/edit"
+@rendermode InteractiveServer
+@using System.IO
+@using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.EntityFrameworkCore
+@using Microsoft.JSInterop
 @using OnlineShopBlazor.Models.Db
 @inject IDbContextFactory<OnlineShopBlazor.Models.Db.OnLineShopContext> DbFactory
+@inject IWebHostEnvironment Environment
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JS
 
 <PageTitle>Edit</PageTitle>
 
@@ -18,9 +24,13 @@ else
 {
     <div class="row">
         <div class="col-md-4">
-            <EditForm method="post" Model="Product" OnValidSubmit="UpdateProduct" FormName="edit" Enhance>
+            <EditForm Model="Product" OnValidSubmit="UpdateProduct" FormName="edit" enctype="multipart/form-data">
                 <DataAnnotationsValidator />
-                <ValidationSummary role="alert"/>
+                <ValidationSummary role="alert" />
+                @if (!string.IsNullOrEmpty(UploadError))
+                {
+                    <div class="alert alert-danger">@UploadError</div>
+                }
                 <input type="hidden" name="Product.Id" value="@Product.Id" />
                 <div class="mb-3">
                     <label for="title" class="form-label">Title:</label>
@@ -33,8 +43,17 @@ else
                     <ValidationMessage For="() => Product.Description" class="text-danger" />
                 </div>
                 <div class="mb-3">
-                    <label for="fulldesc" class="form-label">FullDesc:</label>
-                    <InputText id="fulldesc" @bind-Value="Product.FullDesc" class="form-control" />
+                    <label for="fullDescEditor" class="form-label">FullDesc:</label>
+                    <input type="hidden" id="fullDescValue" name="Product.FullDesc" value="@Product.FullDesc" />
+                    <div class="btn-group btn-group-sm mb-2" role="group" aria-label="Editor FullDesc">
+                        <button type="button" class="btn btn-outline-secondary" title="Grassetto" @onclick='() => ApplyFullDescCommand("bold")'><strong>B</strong></button>
+                        <button type="button" class="btn btn-outline-secondary" title="Corsivo" @onclick='() => ApplyFullDescCommand("italic")'><em>I</em></button>
+                        <button type="button" class="btn btn-outline-secondary" title="Lista" @onclick='() => ApplyFullDescCommand("insertUnorderedList")'>• Lista</button>
+                        <button type="button" class="btn btn-outline-secondary" title="Pulisci formattazione" @onclick='() => ApplyFullDescCommand("removeFormat")'>Reset</button>
+                    </div>
+                    <div id="fullDescEditor" class="form-control rich-text-editor" contenteditable="true" @oninput="HandleFullDescInput">
+                        @((MarkupString)(Product.FullDesc ?? string.Empty))
+                    </div>
                     <ValidationMessage For="() => Product.FullDesc" class="text-danger" />
                 </div>
                 <div class="mb-3">
@@ -51,6 +70,26 @@ else
                     <label for="imagename" class="form-label">ImageName:</label>
                     <InputFile id="imagename" OnChange="HandlePrimaryImageChange" class="form-control" />
                     <ValidationMessage For="() => Product.ImageName" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Gallery Images:</label>
+                    @if (GalleryImages.Count == 0)
+                    {
+                        <p class="text-muted">Nessuna immagine nella galleria.</p>
+                    }
+                    else
+                    {
+                        <ul class="list-group mb-2">
+                            @foreach (var gallery in GalleryImages)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>@gallery.ImageName</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    <button type="button" class="btn btn-outline-secondary" @onclick="ShowGalleryModal">Scegli file</button>
+                    <InputFile id="galleryFileInput" class="d-none" OnChange="HandleGalleryImagesChange" multiple />
                 </div>
                 <div class="mb-3">
                     <label for="qty" class="form-label">Qty:</label>
@@ -77,6 +116,27 @@ else
     <a href="/products">Back to List</a>
 </div>
 
+@if (IsGalleryModalOpen)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);" aria-modal="true" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sostituisci immagini</h5>
+                    <button type="button" class="btn-close" @onclick="CloseGalleryModal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Vuoi sostituire tutte le immagini della galleria con nuove immagini? Questa operazione rimuoverà le immagini esistenti.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseGalleryModal">Annulla</button>
+                    <button type="button" class="btn btn-primary" @onclick="ConfirmGalleryReplacement">Conferma</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     [SupplyParameterFromQuery]
     private int Id { get; set; }
@@ -84,10 +144,21 @@ else
     [SupplyParameterFromForm]
     private Product? Product { get; set; }
 
+    private List<ProductGallery> GalleryImages { get; set; } = new();
+    private IBrowserFile? PrimaryImageFile;
+    private readonly List<GalleryUpload> GalleryUploads = new();
+    private bool ReplaceGalleryRequested { get; set; }
+    private bool IsGalleryModalOpen { get; set; }
+    private string? UploadError { get; set; }
+    private const long MaxUploadSize = 1024 * 1024 * 5;
+    private const string FullDescEditorElementId = "fullDescEditor";
+    private const string FullDescHiddenInputId = "fullDescValue";
+
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
         Product ??= await context.Products.FirstOrDefaultAsync(m => m.Id == Id);
+        GalleryImages = await context.ProductGalleries.Where(g => g.ProductId == Id).ToListAsync();
 
         if (Product is null)
         {
@@ -99,11 +170,26 @@ else
     // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task UpdateProduct()
     {
+        UploadError = null;
+        await SyncFullDescFromEditorAsync();
         using var context = DbFactory.CreateDbContext();
         context.Attach(Product!).State = EntityState.Modified;
 
+        await SavePrimaryImageAsync();
+
         try
         {
+            if (ReplaceGalleryRequested && GalleryUploads.Count == 0)
+            {
+                UploadError = "Seleziona almeno un'immagine per sostituire la galleria.";
+                return;
+            }
+
+            if (ReplaceGalleryRequested)
+            {
+                await ReplaceGalleryAsync(context);
+            }
+
             await context.SaveChangesAsync();
         }
         catch (DbUpdateConcurrencyException)
@@ -116,6 +202,11 @@ else
             {
                 throw;
             }
+        }
+        catch (Exception ex)
+        {
+            UploadError = $"Errore durante l'aggiornamento: {ex.Message}";
+            return;
         }
 
         NavigationManager.NavigateTo("/products");
@@ -131,7 +222,145 @@ else
     {
         if (Product is not null)
         {
-            Product.ImageName = args.File?.Name;
+            PrimaryImageFile = args.File;
+            if (PrimaryImageFile is null)
+            {
+                Product.ImageName = null;
+                return;
+            }
+
+            var extension = Path.GetExtension(PrimaryImageFile.Name);
+            Product.ImageName = $"{Guid.NewGuid()}{extension}";
+        }
+    }
+
+    private void ShowGalleryModal()
+    {
+        IsGalleryModalOpen = true;
+        UploadError = null;
+    }
+
+    private void CloseGalleryModal()
+    {
+        IsGalleryModalOpen = false;
+        ReplaceGalleryRequested = false;
+        GalleryUploads.Clear();
+        UploadError = null;
+    }
+
+    private async Task ConfirmGalleryReplacement()
+    {
+        IsGalleryModalOpen = false;
+        ReplaceGalleryRequested = true;
+        await JS.InvokeVoidAsync("onlineShop.openFileDialogById", "galleryFileInput");
+    }
+
+    private async Task SavePrimaryImageAsync()
+    {
+        if (PrimaryImageFile is null || string.IsNullOrWhiteSpace(Product?.ImageName))
+        {
+            return;
+        }
+
+        var imagesDirectory = Path.Combine(Environment.WebRootPath, "images", "Products");
+        if (!Directory.Exists(imagesDirectory))
+        {
+            Directory.CreateDirectory(imagesDirectory);
+        }
+
+        var filePath = Path.Combine(imagesDirectory, Product!.ImageName);
+        await using FileStream fs = new(filePath, FileMode.Create);
+        await PrimaryImageFile.OpenReadStream(MaxUploadSize).CopyToAsync(fs);
+    }
+
+    private void HandleGalleryImagesChange(InputFileChangeEventArgs args)
+    {
+        GalleryUploads.Clear();
+        foreach (var file in args.GetMultipleFiles())
+        {
+            var extension = Path.GetExtension(file.Name);
+            var storedName = $"{Guid.NewGuid()}{extension}";
+            GalleryUploads.Add(new GalleryUpload(file, storedName));
+        }
+
+        ReplaceGalleryRequested = GalleryUploads.Count > 0;
+    }
+
+    private async Task ReplaceGalleryAsync(OnLineShopContext context)
+    {
+        var existing = await context.ProductGalleries.Where(g => g.ProductId == Product!.Id).ToListAsync();
+        if (existing.Count > 0)
+        {
+            context.ProductGalleries.RemoveRange(existing);
+
+            foreach (var gallery in existing)
+            {
+                if (!string.IsNullOrWhiteSpace(gallery.ImageName))
+                {
+                    var existingPath = Path.Combine(Environment.WebRootPath, "images", "Products", "Gallery", gallery.ImageName);
+                    if (File.Exists(existingPath))
+                    {
+                        File.Delete(existingPath);
+                    }
+                }
+            }
+        }
+
+        if (GalleryUploads.Count == 0)
+        {
+            return;
+        }
+
+        var galleryDirectory = Path.Combine(Environment.WebRootPath, "images", "Products", "Gallery");
+        if (!Directory.Exists(galleryDirectory))
+        {
+            Directory.CreateDirectory(galleryDirectory);
+        }
+
+        foreach (var upload in GalleryUploads)
+        {
+            var destination = Path.Combine(galleryDirectory, upload.StoredName);
+            await using FileStream fs = new(destination, FileMode.Create);
+            await upload.File.OpenReadStream(MaxUploadSize).CopyToAsync(fs);
+
+            context.ProductGalleries.Add(new ProductGallery
+            {
+                ProductId = Product!.Id,
+                ImageName = upload.StoredName
+            });
+        }
+    }
+
+    private sealed class GalleryUpload
+    {
+        public GalleryUpload(IBrowserFile file, string storedName)
+        {
+            File = file;
+            StoredName = storedName;
+        }
+
+        public IBrowserFile File { get; }
+        public string StoredName { get; }
+    }
+
+    private async Task HandleFullDescInput(ChangeEventArgs _)
+    {
+        await SyncFullDescFromEditorAsync();
+    }
+
+    private async Task ApplyFullDescCommand(string command)
+    {
+        await JS.InvokeVoidAsync("onlineShop.execEditorCommand", FullDescEditorElementId, command);
+        await SyncFullDescFromEditorAsync();
+    }
+
+    private async Task SyncFullDescFromEditorAsync()
+    {
+        var content = await JS.InvokeAsync<string>("onlineShop.getContentEditableValue", FullDescEditorElementId);
+        if (Product is not null)
+        {
+            Product.FullDesc = content;
+            await JS.InvokeVoidAsync("onlineShop.setHiddenInputValue", FullDescHiddenInputId, content);
         }
     }
 }
