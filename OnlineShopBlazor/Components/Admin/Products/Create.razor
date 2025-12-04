@@ -1,8 +1,12 @@
 ﻿@page "/products/create"
+@using System.IO
+@using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.EntityFrameworkCore
 @using OnlineShopBlazor.Models.Db
 @inject IDbContextFactory<OnlineShopBlazor.Models.Db.OnLineShopContext> DbFactory
+@inject IWebHostEnvironment Environment
 @inject NavigationManager NavigationManager
+@rendermode InteractiveServer
 
 <PageTitle>Create</PageTitle>
 
@@ -12,7 +16,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <EditForm method="post" Model="Product" OnValidSubmit="AddProduct" FormName="create" Enhance>
+        <EditForm Model="Product" OnValidSubmit="AddProduct" enctype="multipart/form-data">
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" role="alert" />
             <div class="mb-3">
@@ -42,11 +46,13 @@
             </div>
             <div class="mb-3">
                 <label for="imagename" class="form-label">ImageName:</label>
-                <InputFile id="imagename" @bind-Value="Product.ImageName" class="form-control" />
+                <InputFile id="imagename" OnChange="HandlePrimaryImageChange" class="form-control" />
+                <ValidationMessage For="() => Product.ImageName" class="text-danger" />
             </div>
             <div class="mb-3">
-                <label for="Galleryimagesname" class="form-label">Gallery ImageName:</label>
-                <InputFile id="Galleryimagesname" @bind-Value="Product.ImageName" class="form-control" multiple />
+                <label for="galleryimagename" class="form-label">Gallery ImageName:</label>
+                <InputFile id="galleryimagename" OnChange="HandleGalleryImagesChange" class="form-control" multiple />
+                <div class="form-text">Seleziona uno o più file dalla galleria.</div>
             </div>
 
             <div class="mb-3">
@@ -74,16 +80,107 @@
 </div>
 
 @code {
-    [SupplyParameterFromForm]
     private Product Product { get; set; } = new();
+
+    private IBrowserFile? primaryImageFile;
+    private readonly List<GalleryUpload> galleryUploads = new();
+    private const long MaxUploadSize = 1024 * 1024 * 5;
 
     // To protect from overposting attacks, see
     //https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddProduct()
     {
+        await SavePrimaryImageAsync();
+
         using var context = DbFactory.CreateDbContext();
         context.Products.Add(Product);
         await context.SaveChangesAsync();
+
+        if (galleryUploads.Count > 0)
+        {
+            await SaveGalleryImagesAsync(context);
+        }
+
         NavigationManager.NavigateTo("/products");
+    }
+
+    private void HandlePrimaryImageChange(InputFileChangeEventArgs args)
+    {
+        primaryImageFile = args.File;
+
+        if (primaryImageFile is null)
+        {
+            Product.ImageName = null;
+            return;
+        }
+
+        var extension = Path.GetExtension(primaryImageFile.Name);
+        Product.ImageName = $"{Guid.NewGuid()}{extension}";
+    }
+
+    private void HandleGalleryImagesChange(InputFileChangeEventArgs args)
+    {
+        galleryUploads.Clear();
+
+        foreach (var file in args.GetMultipleFiles())
+        {
+            var extension = Path.GetExtension(file.Name);
+            var storedName = $"{Guid.NewGuid()}{extension}";
+            galleryUploads.Add(new GalleryUpload(file, storedName));
+        }
+    }
+
+    private async Task SavePrimaryImageAsync()
+    {
+        if (primaryImageFile is null || string.IsNullOrWhiteSpace(Product.ImageName))
+        {
+            return;
+        }
+
+        var imagesDirectory = Path.Combine(Environment.WebRootPath, "images", "Products");
+        if (!Directory.Exists(imagesDirectory))
+        {
+            Directory.CreateDirectory(imagesDirectory);
+        }
+
+        var filePath = Path.Combine(imagesDirectory, Product.ImageName);
+        await using FileStream fs = new(filePath, FileMode.Create);
+        await primaryImageFile.OpenReadStream(MaxUploadSize).CopyToAsync(fs);
+    }
+
+    private async Task SaveGalleryImagesAsync(OnLineShopContext context)
+    {
+        var galleryPath = Path.Combine(Environment.WebRootPath, "images", "Products", "Gallery");
+        if (!Directory.Exists(galleryPath))
+        {
+            Directory.CreateDirectory(galleryPath);
+        }
+
+        foreach (var upload in galleryUploads)
+        {
+            var destination = Path.Combine(galleryPath, upload.StoredName);
+            await using FileStream fs = new(destination, FileMode.Create);
+            await upload.File.OpenReadStream(MaxUploadSize).CopyToAsync(fs);
+
+            context.ProductGalleries.Add(new ProductGallery
+            {
+                ProductId = Product.Id,
+                ImageName = upload.StoredName
+            });
+        }
+
+        await context.SaveChangesAsync();
+    }
+
+    private sealed class GalleryUpload
+    {
+        public GalleryUpload(IBrowserFile file, string storedName)
+        {
+            File = file;
+            StoredName = storedName;
+        }
+
+        public IBrowserFile File { get; }
+        public string StoredName { get; }
     }
 }

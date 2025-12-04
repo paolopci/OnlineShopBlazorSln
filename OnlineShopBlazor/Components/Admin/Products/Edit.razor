@@ -49,7 +49,7 @@ else
                 </div>
                 <div class="mb-3">
                     <label for="imagename" class="form-label">ImageName:</label>
-                    <InputText id="imagename" @bind-Value="Product.ImageName" class="form-control" />
+                    <InputFile id="imagename" OnChange="HandlePrimaryImageChange" class="form-control" />
                     <ValidationMessage For="() => Product.ImageName" class="text-danger" />
                 </div>
                 <div class="mb-3">
@@ -125,5 +125,13 @@ else
     {
         using var context = DbFactory.CreateDbContext();
         return context.Products.Any(e => e.Id == id);
+    }
+
+    private void HandlePrimaryImageChange(InputFileChangeEventArgs args)
+    {
+        if (Product is not null)
+        {
+            Product.ImageName = args.File?.Name;
+        }
     }
 }
