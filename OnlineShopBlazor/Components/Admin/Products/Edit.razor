@@ -82,18 +82,16 @@ else
                                 <div class="gallery-item">
                                     <img src="@GetGalleryImageUrl(gallery.ImageName)" alt="Product image" class="gallery-thumb" />
                                     <div class="gallery-actions">
-                                        <label class="btn btn-success btn-sm" for="@($"gallery-upload-{gallery.Id}")" title="Aggiungi immagine">
-                                            <i class="bi bi-upload"></i>
+                                        <label class="btn btn-success gallery-action-btn" for="@($"gallery-upload-{gallery.Id}")" title="Sostituisci immagine">
+                                            <i class="bi bi-cloud-upload-fill"></i>
+                                            <span class="gallery-action-label">Edit</span>
                                         </label>
-                                        <InputFile id="@($"gallery-upload-{gallery.Id}")" class="d-none" OnChange="args => AddGalleryImageAsync(args)" />
-                                        <button type="button" class="btn btn-danger btn-sm" @onclick="() => DeleteGalleryImageAsync(gallery.Id)" title="Elimina immagine">
-                                            <i class="bi bi-trash"></i>
+                                        <InputFile id="@($"gallery-upload-{gallery.Id}")" class="d-none" OnChange="args => ReplaceGalleryImageAsync(gallery.Id, args)" />
+                                        <button type="button" class="btn btn-danger gallery-action-btn" @onclick="() => DeleteGalleryImageAsync(gallery.Id)" title="Elimina immagine">
+                                            <i class="bi bi-trash-fill"></i>
+                                            <span class="gallery-action-label">Delete</span>
                                         </button>
                                     </div>
-                                    @if (GalleryActionMessages.TryGetValue(gallery.Id, out var feedback) && !string.IsNullOrWhiteSpace(feedback))
-                                    {
-                                        <pre class="gallery-feedback">@feedback</pre>
-                                    }
                                 </div>
                             }
                         </div>
@@ -102,7 +100,7 @@ else
                     {
                         <pre class="gallery-feedback mt-2">@GalleryGlobalMessage</pre>
                     }
-                    <InputFile id="galleryFileInput" class="form-control mt-2" OnChange="HandleGalleryImagesChange" multiple />
+                    <InputFile id="galleryFileInput" class="form-control mt-2" OnChange="AddGalleryImageAsync" multiple />
                 </div>
                 <div class="mb-3">
                     <label for="qty" class="form-label">Qty:</label>
@@ -362,6 +360,59 @@ else
         catch (Exception ex)
         {
             GalleryGlobalMessage = JsonSerializer.Serialize(new { status = "error", message = $"Errore durante l'upload: {ex.Message}" });
+        }
+    }
+
+    private async Task ReplaceGalleryImageAsync(int galleryId, InputFileChangeEventArgs args)
+    {
+        GalleryGlobalMessage = null;
+        if (args.FileCount == 0)
+        {
+            SetGalleryMessage(galleryId, "error", "Nessun file selezionato.");
+            return;
+        }
+
+        try
+        {
+            using var context = DbFactory.CreateDbContext();
+            var gallery = await context.ProductGalleries.FirstOrDefaultAsync(g => g.Id == galleryId && g.ProductId == Id);
+            if (gallery is null)
+            {
+                SetGalleryMessage(galleryId, "error", "Immagine non trovata.");
+                return;
+            }
+
+            var file = args.File;
+            var extension = Path.GetExtension(file.Name);
+            var storedName = $"{Guid.NewGuid()}{extension}";
+
+            var galleryDirectory = Path.Combine(Environment.WebRootPath, "images", "Products", "Gallery");
+            if (!Directory.Exists(galleryDirectory))
+            {
+                Directory.CreateDirectory(galleryDirectory);
+            }
+
+            if (!string.IsNullOrWhiteSpace(gallery.ImageName))
+            {
+                var existingPath = Path.Combine(galleryDirectory, gallery.ImageName);
+                if (File.Exists(existingPath))
+                {
+                    File.Delete(existingPath);
+                }
+            }
+
+            var destination = Path.Combine(galleryDirectory, storedName);
+            await using FileStream fs = new(destination, FileMode.Create);
+            await file.OpenReadStream(MaxUploadSize).CopyToAsync(fs);
+
+            gallery.ImageName = storedName;
+            await context.SaveChangesAsync();
+            await ReloadGalleryImagesAsync();
+            SetGalleryMessage(galleryId, "success", "Image uploaded successfully");
+        }
+        catch (Exception ex)
+        {
+            SetGalleryMessage(galleryId, "error", $"Errore durante l'upload: {ex.Message}");
         }
     }
 
