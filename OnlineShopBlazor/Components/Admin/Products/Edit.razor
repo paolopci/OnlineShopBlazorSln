@@ -1,4 +1,4 @@
-﻿@page "/products/edit"
+@page "/products/edit"
 @rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using System.IO
@@ -14,19 +14,10 @@
 <h2>Product</h2>
 <hr />
 @if (Product is null)
-
-
-
 {
     <p><em>Loading...</em></p>
 }
-
-
-
 else
-
-
-
 {
     <div class="row">
         <div class="col-md-4">
@@ -34,9 +25,6 @@ else
                 <DataAnnotationsValidator />
                 <ValidationSummary role="alert" />
                 @if (!string.IsNullOrEmpty(UploadError))
-
-
-
                 {
                     <div class="alert alert-danger">@UploadError</div>
                 }
@@ -54,7 +42,7 @@ else
                 <div class="mb-3">
                     <label for="fulldesc" class="form-label">FullDesc:</label>
                     <RadzenHtmlEditor id="fulldesc" class="form-control" Style="min-height: 320px;"
-                    @bind-Value="Product.FullDesc" Change="UpdateFullDescCount" />
+                        @bind-Value="Product.FullDesc" Change="UpdateFullDescCount" />
                     <div class="@($"small text-end {FullDescClass}")">@($"{FullDescCharacterCount}/{FullDescMaxLength}")
                     </div>
                     <ValidationMessage For="() => Product.FullDesc" class="text-danger" />
@@ -120,9 +108,6 @@ else
 </div>
 
 @if (IsGalleryModalOpen)
-
-
-
 {
     <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);" aria-modal="true"
         role="dialog">
@@ -133,8 +118,10 @@ else
                     <button type="button" class="btn-close" @onclick="CloseGalleryModal"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Vuoi sostituire tutte le immagini della galleria con nuove immagini? Questa operazione rimuoverà le
-                        immagini esistenti.</p>
+                    <p>
+                        Vuoi sostituire tutte le immagini della galleria con nuove immagini? Questa operazione
+                        rimuoverà le immagini esistenti.
+                    </p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @onclick="CloseGalleryModal">Annulla</button>
@@ -147,864 +134,222 @@ else
 
 @code {
     [SupplyParameterFromQuery]
-
-
-
     private int Id { get; set; }
 
-
-
-
-
-
-
     [SupplyParameterFromForm]
-
-
-
     private Product? Product { get; set; }
 
-
-
-
-
-
-
     private List<ProductGallery> GalleryImages { get; set; } = new();
-
-
-
     private IBrowserFile? PrimaryImageFile;
-
-
-
     private readonly List<GalleryUpload> GalleryUploads = new();
 
-
-
     private bool ReplaceGalleryRequested { get; set; }
-
-
-
     private bool IsGalleryModalOpen { get; set; }
-
-
-
     private string? UploadError { get; set; }
 
-
-
     private const long MaxUploadSize = 1024 * 1024 * 5;
-
-
-
     private const int FullDescMaxLength = 4000;
 
-
-
     private int FullDescCharacterCount { get; set; }
-
-
-
     private string FullDescClass => FullDescCharacterCount > FullDescMaxLength ? "text-danger" : "text-muted";
 
-
-
-
-
-
-
     protected override async Task OnInitializedAsync()
-
-
-
     {
-
-
-
         using var context = DbFactory.CreateDbContext();
-
-
-
         Product ??= await context.Products.FirstOrDefaultAsync(m => m.Id == Id);
-
-
-
         GalleryImages = await context.ProductGalleries.Where(g => g.ProductId == Id).ToListAsync();
 
-
-
-
-
-
-
         if (Product is null)
-
-
-
         {
-
-
-
             NavigationManager.NavigateTo("notfound");
-
-
-
         }
 
-
-
-
-
-
-
         FullDescCharacterCount = Product?.FullDesc?.Length ?? 0;
-
-
-
     }
 
-
-
-
-
-
-
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-
-
-
-    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
-
-
-
     private async Task UpdateProduct()
-
-
-
     {
-
-
-
         UploadError = null;
-
-
-
         using var context = DbFactory.CreateDbContext();
-
-
-
         context.Attach(Product!).State = EntityState.Modified;
-
-
-
-
-
-
 
         await SavePrimaryImageAsync();
 
-
-
-
-
-
-
         try
-
-
-
         {
-
-
-
             if (ReplaceGalleryRequested && GalleryUploads.Count == 0)
-
-
-
             {
-
-
-
                 UploadError = "Seleziona almeno un'immagine per sostituire la galleria.";
-
-
-
                 return;
-
-
-
             }
-
-
-
-
-
-
 
             if (ReplaceGalleryRequested)
-
-
-
             {
-
-
-
                 await ReplaceGalleryAsync(context);
-
-
-
             }
-
-
-
-
-
-
 
             await context.SaveChangesAsync();
-
-
-
         }
-
-
-
         catch (DbUpdateConcurrencyException)
-
-
-
         {
-
-
-
             if (!ProductExists(Product!.Id))
-
-
-
             {
-
-
-
                 NavigationManager.NavigateTo("notfound");
-
-
-
             }
-
-
-
             else
-
-
-
             {
-
-
-
                 throw;
-
-
-
             }
-
-
-
         }
-
-
-
         catch (Exception ex)
-
-
-
         {
-
-
-
             UploadError = $"Errore durante l'aggiornamento: {ex.Message}";
-
-
-
             return;
-
-
-
         }
-
-
-
-
-
-
 
         NavigationManager.NavigateTo("/products");
-
-
-
     }
-
-
-
-
-
-
 
     private bool ProductExists(int id)
-
-
-
     {
-
-
-
         using var context = DbFactory.CreateDbContext();
-
-
-
         return context.Products.Any(e => e.Id == id);
-
-
-
     }
-
-
-
-
-
-
 
     private void HandlePrimaryImageChange(InputFileChangeEventArgs args)
-
-
-
     {
-
-
-
-        if (Product is not null)
-
-
-
+        if (Product is null)
         {
-
-
-
-            PrimaryImageFile = args.File;
-
-
-
-            if (PrimaryImageFile is null)
-
-
-
-            {
-
-
-
-                Product.ImageName = null;
-
-
-
-                return;
-
-
-
-            }
-
-
-
-
-
-
-
-            var extension = Path.GetExtension(PrimaryImageFile.Name);
-
-
-
-            Product.ImageName = $"{Guid.NewGuid()}{extension}";
-
-
-
+            return;
         }
 
+        PrimaryImageFile = args.File;
+        if (PrimaryImageFile is null)
+        {
+            Product.ImageName = null;
+            return;
+        }
 
-
+        var extension = Path.GetExtension(PrimaryImageFile.Name);
+        Product.ImageName = $"{Guid.NewGuid()}{extension}";
     }
-
-
-
-
-
-
 
     private void ShowGalleryModal()
-
-
-
     {
-
-
-
         IsGalleryModalOpen = true;
-
-
-
         UploadError = null;
-
-
-
     }
-
-
-
-
-
-
 
     private void CloseGalleryModal()
-
-
-
     {
-
-
-
         IsGalleryModalOpen = false;
-
-
-
         ReplaceGalleryRequested = false;
-
-
-
         GalleryUploads.Clear();
-
-
-
         UploadError = null;
-
-
-
     }
-
-
-
-
-
-
 
     private async Task ConfirmGalleryReplacement()
-
-
-
     {
-
-
-
         IsGalleryModalOpen = false;
-
-
-
         ReplaceGalleryRequested = true;
-
-
-
         await JS.InvokeVoidAsync("onlineShop.openFileDialogById", "galleryFileInput");
-
-
-
     }
-
-
-
-
-
-
 
     private async Task SavePrimaryImageAsync()
-
-
-
     {
-
-
-
         if (PrimaryImageFile is null || string.IsNullOrWhiteSpace(Product?.ImageName))
-
-
-
         {
-
-
-
             return;
-
-
-
         }
-
-
-
-
-
-
 
         var imagesDirectory = Path.Combine(Environment.WebRootPath, "images", "Products");
-
-
-
         if (!Directory.Exists(imagesDirectory))
-
-
-
         {
-
-
-
             Directory.CreateDirectory(imagesDirectory);
-
-
-
         }
-
-
-
-
-
-
 
         var filePath = Path.Combine(imagesDirectory, Product!.ImageName);
-
-
-
         await using FileStream fs = new(filePath, FileMode.Create);
-
-
-
         await PrimaryImageFile.OpenReadStream(MaxUploadSize).CopyToAsync(fs);
-
-
-
     }
-
-
-
-
-
-
 
     private void HandleGalleryImagesChange(InputFileChangeEventArgs args)
-
-
-
     {
-
-
-
         GalleryUploads.Clear();
-
-
-
         foreach (var file in args.GetMultipleFiles())
-
-
-
         {
-
-
-
             var extension = Path.GetExtension(file.Name);
-
-
-
             var storedName = $"{Guid.NewGuid()}{extension}";
-
-
-
             GalleryUploads.Add(new GalleryUpload(file, storedName));
-
-
-
         }
-
-
-
-
-
-
 
         ReplaceGalleryRequested = GalleryUploads.Count > 0;
-
-
-
     }
-
-
-
-
-
-
 
     private async Task ReplaceGalleryAsync(OnLineShopContext context)
-
-
-
     {
-
-
-
         var existing = await context.ProductGalleries.Where(g => g.ProductId == Product!.Id).ToListAsync();
-
-
-
         if (existing.Count > 0)
-
-
-
         {
-
-
-
             context.ProductGalleries.RemoveRange(existing);
 
-
-
-
-
-
-
             foreach (var gallery in existing)
-
-
-
             {
-
-
-
                 if (!string.IsNullOrWhiteSpace(gallery.ImageName))
-
-
-
                 {
-
-
-
                     var existingPath = Path.Combine(Environment.WebRootPath, "images", "Products", "Gallery", gallery.ImageName);
-
-
-
                     if (File.Exists(existingPath))
-
-
-
                     {
-
-
-
                         File.Delete(existingPath);
-
-
-
                     }
-
-
-
                 }
-
-
-
             }
-
-
-
         }
-
-
-
-
-
-
 
         if (GalleryUploads.Count == 0)
-
-
-
         {
-
-
-
             return;
-
-
-
         }
-
-
-
-
-
-
 
         var galleryDirectory = Path.Combine(Environment.WebRootPath, "images", "Products", "Gallery");
-
-
-
         if (!Directory.Exists(galleryDirectory))
-
-
-
         {
-
-
-
             Directory.CreateDirectory(galleryDirectory);
-
-
-
         }
-
-
-
-
-
-
 
         foreach (var upload in GalleryUploads)
-
-
-
         {
-
-
-
             var destination = Path.Combine(galleryDirectory, upload.StoredName);
-
-
-
             await using FileStream fs = new(destination, FileMode.Create);
-
-
-
             await upload.File.OpenReadStream(MaxUploadSize).CopyToAsync(fs);
 
-
-
-
-
-
-
             context.ProductGalleries.Add(new ProductGallery
-
-
-
-                {
-
-
-
-                    ProductId = Product!.Id,
-
-
-
-                    ImageName = upload.StoredName
-
-
-
-                });
-
-
-
+            {
+                ProductId = Product!.Id,
+                ImageName = upload.StoredName
+            });
         }
-
-
-
     }
-
-
-
-
-
-
 
     private sealed class GalleryUpload
-
-
-
     {
-
-
-
         public GalleryUpload(IBrowserFile file, string storedName)
-
-
-
         {
-
-
-
             File = file;
-
-
-
             StoredName = storedName;
-
-
-
         }
-
-
-
-
-
-
 
         public IBrowserFile File { get; }
-
-
-
         public string StoredName { get; }
-
-
-
     }
 
-
-
-
-
-
-
     private void UpdateFullDescCount()
-
-
-
     {
-
-
-
         if (Product is null)
-
-
-
         {
-
-
-
             return;
-
-
-
         }
 
-
-
-
-
-
-
         FullDescCharacterCount = Product.FullDesc?.Length ?? 0;
-
-
-
     }
 }
