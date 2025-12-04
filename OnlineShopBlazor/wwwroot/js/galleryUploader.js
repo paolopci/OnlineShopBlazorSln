@@ -21,6 +21,11 @@ window.onlineShop.getContentEditableValue = (editorId) => {
     return element ? element.innerHTML : "";
 };
 
+window.onlineShop.getContentEditableText = (editorId) => {
+    const element = document.getElementById(editorId);
+    return element ? element.innerText : "";
+};
+
 window.onlineShop.setContentEditableHtml = (editorId, value) => {
     const element = document.getElementById(editorId);
     if (element) {

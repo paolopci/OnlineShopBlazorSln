@@ -43,17 +43,13 @@ else
                     <ValidationMessage For="() => Product.Description" class="text-danger" />
                 </div>
                 <div class="mb-3">
-                    <label for="fullDescEditor" class="form-label">FullDesc:</label>
-                    <input type="hidden" id="fullDescValue" name="Product.FullDesc" value="@Product.FullDesc" />
-                    <div class="btn-group btn-group-sm mb-2" role="group" aria-label="Editor FullDesc">
-                        <button type="button" class="btn btn-outline-secondary" title="Grassetto" @onclick='() => ApplyFullDescCommand("bold")'><strong>B</strong></button>
-                        <button type="button" class="btn btn-outline-secondary" title="Corsivo" @onclick='() => ApplyFullDescCommand("italic")'><em>I</em></button>
-                        <button type="button" class="btn btn-outline-secondary" title="Lista" @onclick='() => ApplyFullDescCommand("insertUnorderedList")'>• Lista</button>
-                        <button type="button" class="btn btn-outline-secondary" title="Pulisci formattazione" @onclick='() => ApplyFullDescCommand("removeFormat")'>Reset</button>
-                    </div>
-                    <div id="fullDescEditor" class="form-control rich-text-editor" contenteditable="true" @oninput="HandleFullDescInput">
-                        @((MarkupString)(Product.FullDesc ?? string.Empty))
-                    </div>
+                    <label for="fulldesc" class="form-label">FullDesc:</label>
+                    <InputTextArea id="fulldesc"
+                                   class="form-control"
+                                   Rows="8"
+                                   @bind-Value="Product.FullDesc"
+                                   @oninput="HandleFullDescInput" />
+                    <div class="@($"small text-end {(FullDescCharacterCount > FullDescMaxLength ? "text-danger" : "text-muted")}")">@($"{FullDescCharacterCount}/{FullDescMaxLength}")</div>
                     <ValidationMessage For="() => Product.FullDesc" class="text-danger" />
                 </div>
                 <div class="mb-3">
@@ -151,8 +147,8 @@ else
     private bool IsGalleryModalOpen { get; set; }
     private string? UploadError { get; set; }
     private const long MaxUploadSize = 1024 * 1024 * 5;
-    private const string FullDescEditorElementId = "fullDescEditor";
-    private const string FullDescHiddenInputId = "fullDescValue";
+    private const int FullDescMaxLength = 4000;
+    private int FullDescCharacterCount { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -164,6 +160,8 @@ else
         {
             NavigationManager.NavigateTo("notfound");
         }
+
+        FullDescCharacterCount = Product?.FullDesc?.Length ?? 0;
     }
 
     // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -171,7 +169,6 @@ else
     private async Task UpdateProduct()
     {
         UploadError = null;
-        await SyncFullDescFromEditorAsync();
         using var context = DbFactory.CreateDbContext();
         context.Attach(Product!).State = EntityState.Modified;
 
@@ -343,24 +340,14 @@ else
         public string StoredName { get; }
     }
 
-    private async Task HandleFullDescInput(ChangeEventArgs _)
+    private void HandleFullDescInput(ChangeEventArgs args)
     {
-        await SyncFullDescFromEditorAsync();
-    }
-
-    private async Task ApplyFullDescCommand(string command)
-    {
-        await JS.InvokeVoidAsync("onlineShop.execEditorCommand", FullDescEditorElementId, command);
-        await SyncFullDescFromEditorAsync();
-    }
-
-    private async Task SyncFullDescFromEditorAsync()
-    {
-        var content = await JS.InvokeAsync<string>("onlineShop.getContentEditableValue", FullDescEditorElementId);
-        if (Product is not null)
+        if (Product is null)
         {
-            Product.FullDesc = content;
-            await JS.InvokeVoidAsync("onlineShop.setHiddenInputValue", FullDescHiddenInputId, content);
+            return;
         }
+
+        Product.FullDesc = args.Value?.ToString();
+        FullDescCharacterCount = Product.FullDesc?.Length ?? 0;
     }
 }
