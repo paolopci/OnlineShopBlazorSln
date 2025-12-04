@@ -16,4 +16,7 @@ public partial class ProductGallery
 
     [StringLength(50)]
     public string? ImageName { get; set; }
+
+    [NotMapped]
+    public DateTime UploadedAt { get; set; }
 }

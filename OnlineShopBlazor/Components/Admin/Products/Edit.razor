@@ -2,6 +2,8 @@
 @rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using System.IO
+@using System.Linq
+@using System.Text.Json
 @inject IDbContextFactory<OnlineShopBlazor.Models.Db.OnLineShopContext> DbFactory
 @inject IWebHostEnvironment Environment
 @inject NavigationManager NavigationManager
@@ -74,16 +76,33 @@ else
                     }
                     else
                     {
-                        <ul class="list-group mb-2">
+                        <div class="gallery-row">
                             @foreach (var gallery in GalleryImages)
                             {
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>@gallery.ImageName</span>
-                                </li>
+                                <div class="gallery-item">
+                                    <img src="@GetGalleryImageUrl(gallery.ImageName)" alt="Product image" class="gallery-thumb" />
+                                    <div class="gallery-actions">
+                                        <label class="btn btn-success btn-sm" for="@($"gallery-upload-{gallery.Id}")" title="Aggiungi immagine">
+                                            <i class="bi bi-upload"></i>
+                                        </label>
+                                        <InputFile id="@($"gallery-upload-{gallery.Id}")" class="d-none" OnChange="args => AddGalleryImageAsync(args)" />
+                                        <button type="button" class="btn btn-danger btn-sm" @onclick="() => DeleteGalleryImageAsync(gallery.Id)" title="Elimina immagine">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                    @if (GalleryActionMessages.TryGetValue(gallery.Id, out var feedback) && !string.IsNullOrWhiteSpace(feedback))
+                                    {
+                                        <pre class="gallery-feedback">@feedback</pre>
+                                    }
+                                </div>
                             }
-                        </ul>
+                        </div>
                     }
-                    <InputFile id="galleryFileInput" class="form-control" OnChange="HandleGalleryImagesChange" multiple />
+                    @if (!string.IsNullOrWhiteSpace(GalleryGlobalMessage))
+                    {
+                        <pre class="gallery-feedback mt-2">@GalleryGlobalMessage</pre>
+                    }
+                    <InputFile id="galleryFileInput" class="form-control mt-2" OnChange="HandleGalleryImagesChange" multiple />
                 </div>
                 <div class="mb-3">
                     <label for="qty" class="form-label">Qty:</label>
@@ -120,6 +139,8 @@ else
     private List<ProductGallery> GalleryImages { get; set; } = new();
     private IBrowserFile? PrimaryImageFile;
     private readonly List<GalleryUpload> GalleryUploads = new();
+    private Dictionary<int, string> GalleryActionMessages { get; } = new();
+    private string? GalleryGlobalMessage { get; set; }
 
     private bool ReplaceGalleryRequested { get; set; }
     private string? OriginalImageName { get; set; }
@@ -136,6 +157,7 @@ else
         using var context = DbFactory.CreateDbContext();
         Product ??= await context.Products.FirstOrDefaultAsync(m => m.Id == Id);
         GalleryImages = await context.ProductGalleries.Where(g => g.ProductId == Id).ToListAsync();
+        OrderGalleryImages();
         OriginalImageName = Product?.ImageName;
 
         if (Product is null)
@@ -297,6 +319,119 @@ else
                 ImageName = upload.StoredName
             });
         }
+    }
+
+    private async Task AddGalleryImageAsync(InputFileChangeEventArgs args)
+    {
+        GalleryGlobalMessage = null;
+        if (args.FileCount == 0)
+        {
+            GalleryGlobalMessage = JsonSerializer.Serialize(new { status = "error", message = "Nessun file selezionato." });
+            return;
+        }
+
+        try
+        {
+            using var context = DbFactory.CreateDbContext();
+            foreach (var file in args.GetMultipleFiles())
+            {
+                var extension = Path.GetExtension(file.Name);
+                var storedName = $"{Guid.NewGuid()}{extension}";
+
+                var galleryDirectory = Path.Combine(Environment.WebRootPath, "images", "Products", "Gallery");
+                if (!Directory.Exists(galleryDirectory))
+                {
+                    Directory.CreateDirectory(galleryDirectory);
+                }
+
+                var destination = Path.Combine(galleryDirectory, storedName);
+                await using FileStream fs = new(destination, FileMode.Create);
+                await file.OpenReadStream(MaxUploadSize).CopyToAsync(fs);
+
+                context.ProductGalleries.Add(new ProductGallery
+                {
+                    ProductId = Product!.Id,
+                    ImageName = storedName
+                });
+            }
+
+            await context.SaveChangesAsync();
+            await ReloadGalleryImagesAsync();
+            GalleryGlobalMessage = JsonSerializer.Serialize(new { status = "success", message = "Image aggiunta correttamente." });
+        }
+        catch (Exception ex)
+        {
+            GalleryGlobalMessage = JsonSerializer.Serialize(new { status = "error", message = $"Errore durante l'upload: {ex.Message}" });
+        }
+    }
+
+    private async Task DeleteGalleryImageAsync(int galleryId)
+    {
+        try
+        {
+            using var context = DbFactory.CreateDbContext();
+            var gallery = await context.ProductGalleries.FirstOrDefaultAsync(g => g.Id == galleryId && g.ProductId == Id);
+            if (gallery is null)
+            {
+                SetGalleryMessage(galleryId, "error", "Immagine non trovata.");
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(gallery.ImageName))
+            {
+                var path = Path.Combine(Environment.WebRootPath, "images", "Products", "Gallery", gallery.ImageName);
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+            }
+
+            context.ProductGalleries.Remove(gallery);
+            await context.SaveChangesAsync();
+            await ReloadGalleryImagesAsync();
+            GalleryActionMessages.Remove(galleryId);
+            GalleryGlobalMessage = JsonSerializer.Serialize(new { status = "success", message = "Image deleted successfully" });
+        }
+        catch (Exception ex)
+        {
+            GalleryGlobalMessage = JsonSerializer.Serialize(new { status = "error", message = $"Errore durante l'eliminazione: {ex.Message}" });
+        }
+    }
+
+    private async Task ReloadGalleryImagesAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        GalleryImages = await context.ProductGalleries
+            .Where(g => g.ProductId == Id)
+            .ToListAsync();
+        OrderGalleryImages();
+    }
+
+    private string GetGalleryImageUrl(string? imageName) =>
+        string.IsNullOrWhiteSpace(imageName) ? string.Empty : $"/images/products/gallery/{imageName}";
+
+    private void OrderGalleryImages()
+    {
+        GalleryImages = GalleryImages
+            .OrderByDescending(g => GetGalleryTimestamp(g))
+            .ToList();
+    }
+
+    private DateTime GetGalleryTimestamp(ProductGallery gallery)
+    {
+        if (string.IsNullOrWhiteSpace(gallery.ImageName))
+        {
+            return DateTime.MinValue;
+        }
+
+        var path = Path.Combine(Environment.WebRootPath, "images", "Products", "Gallery", gallery.ImageName);
+        return File.Exists(path) ? File.GetCreationTimeUtc(path) : DateTime.MinValue;
+    }
+
+    private void SetGalleryMessage(int galleryId, string status, string message)
+    {
+        var json = JsonSerializer.Serialize(new { status, message });
+        GalleryActionMessages[galleryId] = json;
     }
 
     private sealed class GalleryUpload
