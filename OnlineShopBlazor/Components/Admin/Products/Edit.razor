@@ -5,7 +5,6 @@
 @inject IDbContextFactory<OnlineShopBlazor.Models.Db.OnLineShopContext> DbFactory
 @inject IWebHostEnvironment Environment
 @inject NavigationManager NavigationManager
-@inject IJSRuntime JS
 
 <PageTitle>Edit</PageTitle>
 
@@ -79,8 +78,7 @@ else
                             }
                         </ul>
                     }
-                    <button type="button" class="btn btn-outline-secondary" @onclick="ShowGalleryModal">Scegli file</button>
-                    <InputFile id="galleryFileInput" class="d-none" OnChange="HandleGalleryImagesChange" multiple />
+                    <InputFile id="galleryFileInput" class="form-control" OnChange="HandleGalleryImagesChange" multiple />
                 </div>
                 <div class="mb-3">
                     <label for="qty" class="form-label">Qty:</label>
@@ -107,31 +105,6 @@ else
     <a href="/products">Back to List</a>
 </div>
 
-@if (IsGalleryModalOpen)
-{
-    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);" aria-modal="true"
-        role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Sostituisci immagini</h5>
-                    <button type="button" class="btn-close" @onclick="CloseGalleryModal"></button>
-                </div>
-                <div class="modal-body">
-                    <p>
-                        Vuoi sostituire tutte le immagini della galleria con nuove immagini? Questa operazione
-                        rimuoverà le immagini esistenti.
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseGalleryModal">Annulla</button>
-                    <button type="button" class="btn btn-primary" @onclick="ConfirmGalleryReplacement">Conferma</button>
-                </div>
-            </div>
-        </div>
-    </div>
-}
-
 @code {
     [SupplyParameterFromQuery]
     private int Id { get; set; }
@@ -144,7 +117,6 @@ else
     private readonly List<GalleryUpload> GalleryUploads = new();
 
     private bool ReplaceGalleryRequested { get; set; }
-    private bool IsGalleryModalOpen { get; set; }
     private string? UploadError { get; set; }
 
     private const long MaxUploadSize = 1024 * 1024 * 5;
@@ -232,27 +204,6 @@ else
 
         var extension = Path.GetExtension(PrimaryImageFile.Name);
         Product.ImageName = $"{Guid.NewGuid()}{extension}";
-    }
-
-    private void ShowGalleryModal()
-    {
-        IsGalleryModalOpen = true;
-        UploadError = null;
-    }
-
-    private void CloseGalleryModal()
-    {
-        IsGalleryModalOpen = false;
-        ReplaceGalleryRequested = false;
-        GalleryUploads.Clear();
-        UploadError = null;
-    }
-
-    private async Task ConfirmGalleryReplacement()
-    {
-        IsGalleryModalOpen = false;
-        ReplaceGalleryRequested = true;
-        await JS.InvokeVoidAsync("onlineShop.openFileDialogById", "galleryFileInput");
     }
 
     private async Task SavePrimaryImageAsync()
