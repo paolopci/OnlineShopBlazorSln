@@ -61,7 +61,14 @@ else
                 <div class="mb-3">
                     <label for="imagename" class="form-label">ImageName:</label>
                     <div class="primary-image-current">
-                        @(string.IsNullOrWhiteSpace(Product.ImageName) ? "Nessuna immagine salvata" : Product.ImageName)
+                        @if (string.IsNullOrWhiteSpace(Product.ImageName))
+                        {
+                            <span class="text-muted">Nessuna immagine salvata</span>
+                        }
+                        else
+                        {
+                            <img src="@GetPrimaryImageUrl(Product.ImageName)" alt="Product image" class="primary-image-thumb" />
+                        }
                     </div>
                     <div class="primary-image-input">
                         <InputFile id="imagename" OnChange="HandlePrimaryImageChange" class="primary-image-input__file" />
@@ -460,6 +467,9 @@ else
 
     private string GetGalleryImageUrl(string? imageName) =>
         string.IsNullOrWhiteSpace(imageName) ? string.Empty : $"/images/products/gallery/{imageName}";
+
+    private string GetPrimaryImageUrl(string? imageName) =>
+        string.IsNullOrWhiteSpace(imageName) ? string.Empty : $"/images/products/{imageName}";
 
     private void OrderGalleryImages()
     {
