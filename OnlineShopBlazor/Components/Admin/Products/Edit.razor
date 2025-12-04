@@ -42,8 +42,10 @@ else
                 </div>
                 <div class="mb-3">
                     <label for="fulldesc" class="form-label">FullDesc:</label>
-                    <RadzenHtmlEditor id="fulldesc" class="form-control" Style="min-height: 320px;"
-                        @bind-Value="Product.FullDesc" Change="UpdateFullDescCount" />
+                    <div class="resizable-editor-wrapper">
+                        <RadzenHtmlEditor id="fulldesc" class="form-control full-desc-editor"
+                            @bind-Value="Product.FullDesc" Change="UpdateFullDescCount" Style="height: 350px" />
+                    </div>
                     <div class="@($"small text-end {FullDescClass}")">@($"{FullDescCharacterCount}/{FullDescMaxLength}")
                     </div>
                     <ValidationMessage For="() => Product.FullDesc" class="text-danger" />
