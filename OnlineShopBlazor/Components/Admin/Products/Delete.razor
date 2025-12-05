@@ -1,8 +1,13 @@
 ﻿@page "/products/delete"
+@using Microsoft.AspNetCore.Hosting
 @using Microsoft.EntityFrameworkCore
+@using System.Collections.Generic
+@using System.IO
+@using System.Linq
 @using OnlineShopBlazor.Models.Db
 @inject IDbContextFactory<OnlineShopBlazor.Models.Db.OnLineShopContext> DbFactory
 @inject NavigationManager NavigationManager
+@inject IWebHostEnvironment WebHostEnvironment
 
 <PageTitle>Delete</PageTitle>
 
@@ -79,9 +84,69 @@
 
     private async Task DeleteProduct()
     {
-        using var context = DbFactory.CreateDbContext();
-        context.Products.Remove(product!);
+        await using var context = DbFactory.CreateDbContext();
+        var productToDelete = await context.Products.FirstOrDefaultAsync(p => p.Id == Id);
+
+        if (productToDelete is null)
+        {
+            NavigationManager.NavigateTo("/products");
+            return;
+        }
+
+        var productImageName = productToDelete.ImageName;
+
+        var galleries = await context.ProductGalleries
+            .Where(g => g.ProductId == productToDelete.Id)
+            .ToListAsync();
+
+        var galleryImageNames = galleries
+            .Select(g => g.ImageName)
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .ToList();
+
+        if (galleries.Count > 0)
+        {
+            context.ProductGalleries.RemoveRange(galleries);
+        }
+
+        context.Products.Remove(productToDelete);
         await context.SaveChangesAsync();
+        DeleteProductImages(productImageName, galleryImageNames);
         NavigationManager.NavigateTo("/products");
     }
+
+    private void DeleteProductImages(string? productImageName, IEnumerable<string?> galleryImageNames)
+    {
+        if (string.IsNullOrWhiteSpace(WebHostEnvironment?.WebRootPath))
+        {
+            return;
+        }
+
+        var productsPath = Path.Combine(WebHostEnvironment.WebRootPath, "images", "Products");
+        var galleryPath = Path.Combine(productsPath, "Gallery");
+
+        if (!string.IsNullOrWhiteSpace(productImageName))
+        {
+            DeleteFileIfExists(Path.Combine(productsPath, productImageName));
+        }
+
+        foreach (var galleryImage in galleryImageNames)
+        {
+            if (string.IsNullOrWhiteSpace(galleryImage))
+            {
+                continue;
+            }
+
+            DeleteFileIfExists(Path.Combine(galleryPath, galleryImage));
+        }
+    }
+
+    private static void DeleteFileIfExists(string path)
+    {
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
+    }
 }
+@inject IWebHostEnvironment WebHostEnvironment
