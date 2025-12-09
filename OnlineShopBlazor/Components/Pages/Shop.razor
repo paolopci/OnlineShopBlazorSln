@@ -48,7 +48,7 @@
                     @foreach (var product in Products)
                     {
                         <div class="col-lg-4 col-md-4 col-sm-6 col-6 ">
-                              <div class="single_product">
+                            <div class="single_product">
                                 <div class="product_thumb">
                                     <a href="product-details.html">
                                         <img class="primary_img" src="images/Products/@product.ImageName" alt="consectetur">
@@ -76,7 +76,11 @@
                                         </ul>
                                     </div>
                                     <div class="product_label">
-                                        <span>-18%</span>
+                                        @* <span>-18%</span> *@
+                                        @if (product.Discount > 0)
+                                        {
+                                            <span>-@product.Discount?.ToString("F0")%</span>
+                                        }
                                     </div>
                                 </div>
                                 <div class="product_content grid_content text-center">
@@ -94,8 +98,8 @@
                                         <a href="product-details.html">Basic White Simple Sneaker</a>
                                     </h4>
                                     <div class="price_box">
-                                        <span class="current_price">$43.00</span>
-                                        <span class="old_price">$46.00</span>
+                                        <span class="current_price">@product.Price?.ToString("C2")</span>
+                                        @* <span class="old_price">$46.00</span> *@
                                     </div>
                                     <div class="add_to_cart">
                                         <a class="btn btn-primary" href="#" data-tippy="Add To Cart"
@@ -109,7 +113,7 @@
                                     </h4>
                                     <p><a href="#">shows</a></p>
                                     <div class="price_box">
-                                        <span class="current_price">$43.00</span>
+                                        <span class="current_price">@product.Price?.ToString("C2")</span>
                                         <span class="old_price">$46.00</span>
                                     </div>
                                     <div class="product_desc">
@@ -141,7 +145,7 @@
 </div>
 <!--shop  area end-->
 @code {
-    private List<Product>? Products = new();
+    private List<Product> Products = new();
 
     // [SupplyParameterFromQuery]
     // private int Id { get; set; }

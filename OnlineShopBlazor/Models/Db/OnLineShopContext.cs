@@ -11,14 +11,13 @@ public partial class OnLineShopContext : DbContext
     public OnLineShopContext(DbContextOptions<OnLineShopContext> options)
         : base(options) { }
 
-    public virtual DbSet<Banner> Banners { get; set; }
+    public virtual DbSet<Banner> Banners { get; set; } = default!;
 
-    public virtual DbSet<Menu> Menus { get; set; }
+    public virtual DbSet<Menu> Menus { get; set; } = default!;
 
-    public virtual DbSet<Product> Products { get; set; }
+    public virtual DbSet<Product> Products { get; set; } = default!;
 
-    public virtual DbSet<ProductGallery> ProductGalleries { get; set; }
-
+    public virtual DbSet<ProductGallery> ProductGalleries { get; set; } = default!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
