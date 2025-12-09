@@ -47,6 +47,14 @@
                 <div class="row shop_wrapper">
                     @foreach (var product in Products)
                     {
+                        var price = product.Price ?? 0;
+                        var discount = product.Discount ?? 0;
+                        var currentPrice = price;
+                        if (discount > 0)
+                        {
+                            currentPrice = price - (price * discount / 100);
+                        }
+
                         <div class="col-lg-4 col-md-4 col-sm-6 col-6 ">
                             <div class="single_product">
                                 <div class="product_thumb">
@@ -98,8 +106,11 @@
                                         <a href="product-details.html">Basic White Simple Sneaker</a>
                                     </h4>
                                     <div class="price_box">
-                                        <span class="current_price">@product.Price?.ToString("C2")</span>
-                                        @* <span class="old_price">$46.00</span> *@
+                                        <span class="current_price">@currentPrice.ToString("C2")</span>
+                                        @if (discount > 0)
+                                        {
+                                            <span class="old_price">@product.Price?.ToString("C2")</span>
+                                        }
                                     </div>
                                     <div class="add_to_cart">
                                         <a class="btn btn-primary" href="#" data-tippy="Add To Cart"
@@ -113,8 +124,11 @@
                                     </h4>
                                     <p><a href="#">shows</a></p>
                                     <div class="price_box">
-                                        <span class="current_price">@product.Price?.ToString("C2")</span>
-                                        <span class="old_price">$46.00</span>
+                                        <span class="current_price">@currentPrice.ToString("C2")</span>
+                                        @if (discount > 0)
+                                        {
+                                            <span class="old_price">@product.Price?.ToString("C2")</span>
+                                        }
                                     </div>
                                     <div class="product_desc">
                                         <p>
