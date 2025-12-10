@@ -117,10 +117,12 @@
     
     
     //Search Box addClass removeClass
-    $('.header_search > a').on('click', function(){
+    $('.header_search > a').on('click', function(event){
+        event.preventDefault()
         $('.page_search_box').addClass('active')
     });
-    $('.search_close > i').on('click', function(){
+    $('.search_close > i').on('click', function(event){
+        event.preventDefault()
         $('.page_search_box').removeClass('active')
     });
     
