@@ -60,7 +60,7 @@
                         <ul class="offcanvas_main_menu">
                             @foreach (var menu in TopMenu)
                             { // menu del panino!!
-                                <li><a href="@menu.Link">@menu.MenuTitle</a></li>
+                              <li><a href="@menu.Link">@menu.MenuTitle</a></li>
                             }
                         </ul>
                     </div>
@@ -219,7 +219,7 @@
                         </div>
                         <div class="header_account">
                             <ul class="d-flex">
-                                <li class="header_search"><a href="#"><i class="icon-magnifier icons"></i></a></li>
+                                <li class="header_search"><a><i class="icon-magnifier icons"></i></a></li>
                                 <li class="account_link">
                                     <a href="#"><i class="icon-user icons"></i></a>
                                     <ul class="dropdown_account_link">
@@ -247,10 +247,11 @@
         <div class="search_close">
             <i class="ion-close-round"></i>
         </div>
-        <form class="border-bottom" action="#">
+        @*    <form class="border-bottom" action="#">
             <input class="border-0" placeholder="Search products..." type="text">
             <button type="submit"><span class="icon-magnifier icons"></span></button>
-        </form>
+        </form> *@
+        <SearchComponent></SearchComponent>
     </div>
 
 </header>
