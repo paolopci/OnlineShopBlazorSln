@@ -12,6 +12,8 @@ builder.Services.AddDbContextFactory<OnLineShopContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("OnlineShopDb")));
 builder.Services.AddQuickGridEntityFrameworkAdapter();
 builder.Services.AddRadzenComponents();
+// blazer.bootstrap service
+builder.Services.AddBlazorBootstrap();
 
 var app = builder.Build();
 
@@ -25,6 +27,8 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.UseAntiforgery();
 
