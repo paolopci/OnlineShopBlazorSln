@@ -45,7 +45,7 @@
                 </div>
                 <!--shop toolbar end-->
                 <div class="row shop_wrapper">
-                    @foreach (var product in Products)
+                    @foreach (var product in Products ?? [])
                     {
                         var price = product.Price ?? 0;
                         var discount = product.Discount ?? 0;
@@ -103,7 +103,7 @@
                                         </ul>
                                     </div>
                                     <h4 class="product_name">
-                                        <a href="product-details.html">Basic White Simple Sneaker</a>
+                                        <a href="product-details.html">@product.Title</a>
                                     </h4>
                                     <div class="price_box">
                                         <span class="current_price">@currentPrice.ToString("C2")</span>
@@ -120,7 +120,7 @@
                                 </div>
                                 <div class="product_list_content">
                                     <h4 class="product_name">
-                                        <a href="product-details.html">Basic White Simple Sneaker</a>
+                                        <a href="product-details.html">@product.Title</a>
                                     </h4>
                                     <p><a href="#">shows</a></p>
                                     <div class="price_box">
