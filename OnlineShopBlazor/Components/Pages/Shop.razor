@@ -161,12 +161,20 @@
 @code {
     private List<Product> Products = new();
 
-    // [SupplyParameterFromQuery]
-    // private int Id { get; set; }
+    [SupplyParameterFromQuery]
+    public string? q { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
-        Products = await context.Products.OrderByDescending(x => x.Id).ToListAsync();
+        var query = context.Products.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(q))
+        {
+            query = query.Where(x => (x.Title != null && x.Title.Contains(q)) || (x.Description != null &&
+            x.Description.Contains(q)));
+        }
+
+        Products = await query.OrderByDescending(x => x.Id).ToListAsync();
     }
 }

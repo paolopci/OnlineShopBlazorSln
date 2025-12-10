@@ -1,7 +1,11 @@
-<form class="border-bottom" action="#">
-    <input class="border-0" placeholder="Search products..." type="text">
+@inject NavigationManager Navigation
+
+<form class="border-bottom" action="/shop" method="get">
+    <input class="border-0" placeholder="Search products..." type="text" name="q" value="@q">
     <button type="submit"><span class="icon-magnifier icons"></span></button>
 </form>
 
 @code {
+    [SupplyParameterFromQuery]
+    public string? q { get; set; }
 }
