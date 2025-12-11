@@ -14,9 +14,9 @@
             <div class="col-12">
                 <div class="breadcrumb_content">
                     <ul>
-                        <li><a href="index.html">home</a></li>
-                        <li><a href="shop.html">shop</a></li>
-                        <li>Product Example</li>
+                        <li><a href="/">home</a></li>
+                        <li><a href="/shop">shop</a></li>
+                        <li>@(Product?.Title ?? "Product")</li>
                     </ul>
                 </div>
             </div>
@@ -784,7 +784,7 @@
         }
 
         Galleries = await dbContext.ProductGalleries
-            .Where(g => g.ProductId == Product.Id)
-            .ToListAsync();
+        .Where(g => g.ProductId == Product.Id)
+        .ToListAsync();
     }
 }
