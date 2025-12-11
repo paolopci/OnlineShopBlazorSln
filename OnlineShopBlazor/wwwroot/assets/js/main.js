@@ -143,7 +143,8 @@
     
     
     /*instagram activation*/
-    if ($.instagramFeed) {
+    /*instagram activation*/
+    /*if ($.instagramFeed) {
         $.instagramFeed({
             'username': 'portfolio.devitems',
             'container': "#instagramFeed",
@@ -156,7 +157,7 @@
             'items_per_row': 4,
             'margin': 2,
         });
-    }
+    }*/
 
       /*---  ScrollUp Active ---*/
     $.scrollUp({
@@ -248,15 +249,15 @@
     
       
      /*---  Accordion---*/
-    $(".faequently-accordion").collapse({
-        accordion:true,
-        open: function() {
-        this.slideDown(300);
-      },
-      close: function() {
-        this.slideUp(300);
-      }		
-    });	
+    // $(".faequently-accordion").collapse({
+    //     accordion:true,
+    //     open: function() {
+    //     this.slideDown(300);
+    //   },
+    //   close: function() {
+    //     this.slideUp(300);
+    //   }		
+    // });	
     
     
   

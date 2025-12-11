@@ -1,4 +1,5 @@
 ﻿@page "/"
+@rendermode InteractiveServer
 @page "/index"
 @using Microsoft.AspNetCore.Components
 @using Microsoft.EntityFrameworkCore
@@ -11,38 +12,40 @@
 
 
 <!--slider area start-->
-<section class="slider_section mb-63">
-    <div class="slider_area slick_slider_activation" data-slick='{
-            "slidesToShow": 1,
-            "slidesToScroll": 1,
-            "arrows": true,
-            "dots": true,
-            "autoplay": false,
-            "speed": 300,
-            "infinite": true
-        }'>
-        @foreach (var slide in Slides)
-        {
-            <div class="single_slider d-flex align-items-center" data-bgimg="images/banners/@slide.ImageName">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-6 col-md-7">
-                            <div class="slider_text">
-                                <span>Lookbook</span>
-                                <h1>@(RenderMultiline(subTitle: slide.Title))</h1>
-                                <p>@(RenderMultiline(subTitle: slide.SubTitle))</p>
-                                @if (!string.IsNullOrEmpty(slide.Link))
-                                {
-                                    <a class="btn btn-primary" href="@slide.Link">Explore Now</a>
-                                }
+<section class="mb-63">
+    @if (Slides.Any())
+    {
+        <Carousel ShowIndicators="true">
+            @foreach (var slide in Slides)
+            {
+                <CarouselItem Active="@(slide == Slides.First())">
+                    <div class="single_slider d-flex align-items-center" style="background-image: url('images/banners/@slide.ImageName');">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-6 col-md-7">
+                                    <div class="slider_text">
+                                        <span>Lookbook</span>
+                                        <h1>@(RenderMultiline(subTitle: slide.Title))</h1>
+                                        <p>@(RenderMultiline(subTitle: slide.SubTitle))</p>
+                                        @if (!string.IsNullOrEmpty(slide.Link))
+                                        {
+                                            <a class="btn btn-primary" href="@slide.Link">Explore Now</a>
+                                        }
 
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        }
-    </div>
+                </CarouselItem>
+            }
+        </Carousel>
+    }
+    else
+    {
+        <p>Loading Slides... (Count: @Slides.Count)</p>
+    }
+
 </section>
 <!--slider area end-->
 
