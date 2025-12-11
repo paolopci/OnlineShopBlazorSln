@@ -78,9 +78,13 @@
 <div>
     <a href="/products">Back to List</a>
 </div>
+<Preload />
+
 
 @code {
     private Product Product { get; set; } = new();
+    [Inject]
+    protected PreloadService PreloadService { get; set; } = default!;
 
     private IBrowserFile? primaryImageFile;
     private readonly List<GalleryUpload> galleryUploads = new();
@@ -90,6 +94,9 @@
     //https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddProduct()
     {
+        //--------------------------------------
+        PreloadService.Show(SpinnerColor.Light, "Saving... Please Wait...");
+        //--------------------------------------
         await SavePrimaryImageAsync();
 
         using var context = DbFactory.CreateDbContext();
@@ -100,7 +107,9 @@
         {
             await SaveGalleryImagesAsync(context);
         }
-
+        //--------------------------------------
+        PreloadService.Hide();
+        //--------------------------------------
         NavigationManager.NavigateTo("/products");
     }
 

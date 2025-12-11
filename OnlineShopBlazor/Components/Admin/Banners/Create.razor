@@ -60,11 +60,16 @@
 <div>
     <a href="/banners">Back to List</a>
 </div>
+<Preload />
+
+
 
 @code {
     private Banner Banner { get; set; } = new();
     private IBrowserFile? selectedFile;
     private string? selectedFileName;
+    [Inject]
+    protected PreloadService PreloadService { get; set; } = default!;
 
     private async Task LoadFiles(InputFileChangeEventArgs e)
     {
@@ -81,6 +86,9 @@
     // https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddBanner()
     {
+        //--------------------------------------
+        PreloadService.Show(SpinnerColor.Light, "Saving... Please Wait...");
+        //--------------------------------------
         // Salva il file su disco solo se il form è valido e viene sottomesso
         if (selectedFile != null && !string.IsNullOrEmpty(selectedFileName))
         {
@@ -101,6 +109,9 @@
         using var context = DbFactory.CreateDbContext();
         context.Banners.Add(Banner);
         await context.SaveChangesAsync();
+        //--------------------------------------
+        PreloadService.Hide();
+        //--------------------------------------
         NavigationManager.NavigateTo("/banners");
     }
 }

@@ -43,8 +43,8 @@ else
                 <div class="mb-3">
                     <label for="fulldesc" class="form-label">FullDesc:</label>
                     <div class="resizable-editor-wrapper">
-                        <RadzenHtmlEditor id="fulldesc" class="form-control full-desc-editor"
-                            @bind-Value="Product.FullDesc" Change="UpdateFullDescCount" Style="height: 350px" />
+                        <RadzenHtmlEditor id="fulldesc" class="form-control full-desc-editor" @bind-Value="Product.FullDesc"
+                            Change="UpdateFullDescCount" Style="height: 350px" />
                     </div>
                     <div class="@($"small text-end {FullDescClass}")">@($"{FullDescCharacterCount}/{FullDescMaxLength}")
                     </div>
@@ -91,12 +91,15 @@ else
                                 <div class="gallery-item">
                                     <img src="@GetGalleryImageUrl(gallery.ImageName)" alt="Product image" class="gallery-thumb" />
                                     <div class="gallery-actions">
-                                        <label class="btn btn-success gallery-action-btn" for="@($"gallery-upload-{gallery.Id}")" title="Sostituisci immagine">
+                                        <label class="btn btn-success gallery-action-btn" for="@($"gallery-upload-{gallery.Id}")"
+                                            title="Sostituisci immagine">
                                             <i class="bi bi-cloud-upload-fill"></i>
                                             <span class="gallery-action-label">Edit</span>
                                         </label>
-                                        <InputFile id="@($"gallery-upload-{gallery.Id}")" class="d-none" OnChange="args => ReplaceGalleryImageAsync(gallery.Id, args)" />
-                                        <button type="button" class="btn btn-danger gallery-action-btn" @onclick="() => DeleteGalleryImageAsync(gallery.Id)" title="Elimina immagine">
+                                        <InputFile id="@($"gallery-upload-{gallery.Id}")" class="d-none"
+                                            OnChange="args => ReplaceGalleryImageAsync(gallery.Id, args)" />
+                                        <button type="button" class="btn btn-danger gallery-action-btn"
+                                            @onclick="() => DeleteGalleryImageAsync(gallery.Id)" title="Elimina immagine">
                                             <i class="bi bi-trash-fill"></i>
                                             <span class="gallery-action-label">Delete</span>
                                         </button>
@@ -135,6 +138,7 @@ else
 <div>
     <a href="/products">Back to List</a>
 </div>
+<Preload />
 
 @code {
     [SupplyParameterFromQuery]
@@ -142,6 +146,8 @@ else
 
     [SupplyParameterFromForm]
     private Product? Product { get; set; }
+    [Inject]
+    protected PreloadService PreloadService { get; set; } = default!;
 
     private List<ProductGallery> GalleryImages { get; set; } = new();
     private IBrowserFile? PrimaryImageFile;
@@ -177,6 +183,9 @@ else
 
     private async Task UpdateProduct()
     {
+        // ------------------------------------------------------------------
+        PreloadService.Show(SpinnerColor.Light, "Saving... Please Wait...");
+        // ------------------------------------------------------------------
         UploadError = null;
         using var context = DbFactory.CreateDbContext();
         context.Attach(Product!).State = EntityState.Modified;
@@ -200,6 +209,9 @@ else
         }
         catch (DbUpdateConcurrencyException)
         {
+            // ------------------------------------------------------------------
+            PreloadService.Hide();
+            // ------------------------------------------------------------------
             if (!ProductExists(Product!.Id))
             {
                 NavigationManager.NavigateTo("notfound");
@@ -214,7 +226,9 @@ else
             UploadError = $"Errore durante l'aggiornamento: {ex.Message}";
             return;
         }
-
+        // ------------------------------------------------------------------
+        PreloadService.Hide();
+        // ------------------------------------------------------------------
         NavigationManager.NavigateTo("/products");
     }
 
@@ -255,7 +269,8 @@ else
             Directory.CreateDirectory(imagesDirectory);
         }
 
-        if (!string.IsNullOrWhiteSpace(OriginalImageName) && !string.Equals(OriginalImageName, Product.ImageName, StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrWhiteSpace(OriginalImageName) && !string.Equals(OriginalImageName, Product.ImageName,
+        StringComparison.OrdinalIgnoreCase))
         {
             var originalPath = Path.Combine(imagesDirectory, OriginalImageName);
             if (File.Exists(originalPath))
@@ -462,22 +477,22 @@ else
     {
         using var context = DbFactory.CreateDbContext();
         GalleryImages = await context.ProductGalleries
-            .Where(g => g.ProductId == Id)
-            .ToListAsync();
+        .Where(g => g.ProductId == Id)
+        .ToListAsync();
         OrderGalleryImages();
     }
 
     private string GetGalleryImageUrl(string? imageName) =>
-        string.IsNullOrWhiteSpace(imageName) ? string.Empty : $"/images/products/gallery/{imageName}";
+    string.IsNullOrWhiteSpace(imageName) ? string.Empty : $"/images/products/gallery/{imageName}";
 
     private string GetPrimaryImageUrl(string? imageName) =>
-        string.IsNullOrWhiteSpace(imageName) ? string.Empty : $"/images/products/{imageName}";
+    string.IsNullOrWhiteSpace(imageName) ? string.Empty : $"/images/products/{imageName}";
 
     private void OrderGalleryImages()
     {
         GalleryImages = GalleryImages
-            .OrderByDescending(g => GetGalleryTimestamp(g))
-            .ToList();
+        .OrderByDescending(g => GetGalleryTimestamp(g))
+        .ToList();
     }
 
     private DateTime GetGalleryTimestamp(ProductGallery gallery)
