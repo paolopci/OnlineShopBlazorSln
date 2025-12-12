@@ -1,0 +1,65 @@
+@using OnlineShopBlazor.Models.Db
+
+<div class="gallery-container">
+    <div class="thumbnails-column">
+        @foreach (var image in AllImages)
+        {
+            <div class="thumbnail-wrapper @(CurrentImage == image ? "selected" : "")" @onclick="() => SelectImage(image)">
+                <img src="@image" alt="Product thumbnail" />
+            </div>
+        }
+    </div>
+    <div class="main-image-column">
+        @if (CurrentImage != null)
+        {
+            <img src="@CurrentImage" alt="Main product image" />
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string? ImageName { get; set; }
+
+    [Parameter]
+    public List<ProductGallery> Galleries { get; set; } = new();
+
+    private string? CurrentImage;
+    private List<string> AllImages = new();
+
+    protected override void OnParametersSet()
+    {
+        var newImages = new List<string>();
+
+        // Main Image (always first if exists)
+        if (!string.IsNullOrEmpty(ImageName))
+        {
+            newImages.Add($"/images/products/{ImageName}");
+        }
+
+        // Gallery Images
+        if (Galleries != null)
+        {
+            foreach (var item in Galleries)
+            {
+                if (!string.IsNullOrEmpty(item.ImageName))
+                {
+                    newImages.Add($"/images/products/Gallery/{item.ImageName}");
+                }
+            }
+        }
+
+        AllImages = newImages;
+
+        // If CurrentImage is null or not in the new list (e.g. product changed), reset to first
+        if (CurrentImage == null || !AllImages.Contains(CurrentImage))
+        {
+            CurrentImage = AllImages.FirstOrDefault();
+        }
+    }
+
+    private void SelectImage(string imageUrl)
+    {
+        CurrentImage = imageUrl;
+    }
+}

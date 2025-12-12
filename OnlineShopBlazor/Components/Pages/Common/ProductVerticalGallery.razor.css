@@ -1,0 +1,54 @@
+.gallery-container {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
+.thumbnails-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100px;
+    flex-shrink: 0;
+}
+
+.thumbnail-wrapper {
+    cursor: pointer;
+    border: 2px solid transparent;
+    opacity: 0.7;
+    transition: all 0.2s;
+}
+
+.thumbnail-wrapper:hover {
+    opacity: 1;
+}
+
+.thumbnail-wrapper.selected {
+    border-color: #333;
+    /* Dark border for selection */
+    opacity: 1;
+}
+
+.thumbnail-wrapper img {
+    width: 100%;
+    display: block;
+    aspect-ratio: 1 / 1;
+    /* Keep thumbs square-ish */
+    object-fit: cover;
+}
+
+.main-image-column {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+}
+
+.main-image-column img {
+    max-width: 100%;
+    height: auto;
+    max-height: 75vh;
+    /* Limit height to viewport height approx */
+    object-fit: contain;
+}

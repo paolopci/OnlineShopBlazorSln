@@ -1,0 +1,19 @@
+::deep .carousel-control-prev-icon,
+::deep .carousel-control-next-icon {
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent dark background */
+    border-radius: 50%; /* Circular background */
+    padding: 1.5rem; /* Increase clickable area and background size */
+    background-size: 60%; /* Adjust icon size relative to the background */
+    background-position: center;
+}
+
+::deep .carousel-control-prev,
+::deep .carousel-control-next {
+    opacity: 1; /* Ensure controls are always fully opaque to show the background */
+    width: 5%; /* Adjust width if necessary, default is usually fine */
+}
+
+::deep .carousel-control-prev-icon:hover,
+::deep .carousel-control-next-icon:hover {
+    background-color: rgba(0, 0, 0, 0.8); /* Darker on hover for feedback */
+}
