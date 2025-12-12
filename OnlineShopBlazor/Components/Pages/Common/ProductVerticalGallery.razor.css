@@ -1,7 +1,12 @@
 .gallery-container {
     display: flex;
     flex-direction: row;
-    gap: 20px;
+    position: relative;
+    /* Anchor for absolute positioning */
+    padding-left: 120px;
+    /* Make space for the absolute thumbnail column */
+    min-height: 400px;
+    /* Prevent collapse if main image hasn't loaded */
 }
 
 .thumbnails-column {
@@ -9,7 +14,15 @@
     flex-direction: column;
     gap: 10px;
     width: 100px;
-    flex-shrink: 0;
+    position: absolute;
+    /* Take out of flow */
+    left: 0;
+    top: 0;
+    bottom: 0;
+    /* Stretch to container height */
+    overflow-y: auto;
+    /* Scroll if content exceeds container height */
+    max-height: 100%;
 }
 
 .thumbnail-wrapper {
