@@ -7,6 +7,7 @@
 @inject IDbContextFactory<OnlineShopBlazor.Models.Db.OnLineShopContext> DbFactory
 @inject IWebHostEnvironment Environment
 @inject NavigationManager NavigationManager
+@inject OnlineShopBlazor.Services.ImageService ImageService
 
 <PageTitle>Edit</PageTitle>
 
@@ -280,8 +281,7 @@ else
         }
 
         var filePath = Path.Combine(imagesDirectory, Product!.ImageName);
-        await using FileStream fs = new(filePath, FileMode.Create);
-        await PrimaryImageFile.OpenReadStream(MaxUploadSize).CopyToAsync(fs);
+        await ImageService.SaveImageAsync(PrimaryImageFile, filePath);
         OriginalImageName = Product.ImageName;
     }
 
@@ -332,8 +332,7 @@ else
         foreach (var upload in GalleryUploads)
         {
             var destination = Path.Combine(galleryDirectory, upload.StoredName);
-            await using FileStream fs = new(destination, FileMode.Create);
-            await upload.File.OpenReadStream(MaxUploadSize).CopyToAsync(fs);
+            await ImageService.SaveImageAsync(upload.File, destination);
 
             context.ProductGalleries.Add(new ProductGallery
             {
@@ -367,8 +366,7 @@ else
                 }
 
                 var destination = Path.Combine(galleryDirectory, storedName);
-                await using FileStream fs = new(destination, FileMode.Create);
-                await file.OpenReadStream(MaxUploadSize).CopyToAsync(fs);
+                await ImageService.SaveImageAsync(file, destination);
 
                 context.ProductGalleries.Add(new ProductGallery
                 {
@@ -426,8 +424,7 @@ else
             }
 
             var destination = Path.Combine(galleryDirectory, storedName);
-            await using FileStream fs = new(destination, FileMode.Create);
-            await file.OpenReadStream(MaxUploadSize).CopyToAsync(fs);
+            await ImageService.SaveImageAsync(file, destination);
 
             gallery.ImageName = storedName;
             await context.SaveChangesAsync();

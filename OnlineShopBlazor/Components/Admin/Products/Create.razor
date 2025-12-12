@@ -6,6 +6,7 @@
 @inject IDbContextFactory<OnlineShopBlazor.Models.Db.OnLineShopContext> DbFactory
 @inject IWebHostEnvironment Environment
 @inject NavigationManager NavigationManager
+@inject OnlineShopBlazor.Services.ImageService ImageService
 @rendermode InteractiveServer
 
 <PageTitle>Create</PageTitle>
@@ -153,8 +154,7 @@
         }
 
         var filePath = Path.Combine(imagesDirectory, Product.ImageName);
-        await using FileStream fs = new(filePath, FileMode.Create);
-        await primaryImageFile.OpenReadStream(MaxUploadSize).CopyToAsync(fs);
+        await ImageService.SaveImageAsync(primaryImageFile, filePath);
     }
 
     private async Task SaveGalleryImagesAsync(OnLineShopContext context)
@@ -168,14 +168,13 @@
         foreach (var upload in galleryUploads)
         {
             var destination = Path.Combine(galleryPath, upload.StoredName);
-            await using FileStream fs = new(destination, FileMode.Create);
-            await upload.File.OpenReadStream(MaxUploadSize).CopyToAsync(fs);
+            await ImageService.SaveImageAsync(upload.File, destination);
 
             context.ProductGalleries.Add(new ProductGallery
-            {
-                ProductId = Product.Id,
-                ImageName = upload.StoredName
-            });
+                {
+                    ProductId = Product.Id,
+                    ImageName = upload.StoredName
+                });
         }
 
         await context.SaveChangesAsync();

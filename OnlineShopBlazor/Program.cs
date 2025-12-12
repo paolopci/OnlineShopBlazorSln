@@ -14,6 +14,7 @@ builder.Services.AddQuickGridEntityFrameworkAdapter();
 builder.Services.AddRadzenComponents();
 // blazer.bootstrap service
 builder.Services.AddBlazorBootstrap();
+builder.Services.AddScoped<OnlineShopBlazor.Services.ImageService>();
 
 var app = builder.Build();
 
