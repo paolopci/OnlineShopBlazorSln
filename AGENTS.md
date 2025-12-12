@@ -1,4 +1,4 @@
-# Repository Guidelines
+﻿# Repository Guidelines
 
 ## Project Structure & Module Organization
 - Solution entry: `OnlineShopBlazorSln.slnx`; main app in `OnlineShopBlazor/`.
@@ -53,3 +53,4 @@
 
 ### Implementation Plan
 - **Lingua**: Il contenuto dell'Implementation Plan deve essere SEMPRE tradotto interamente in ITALIANO.
+
