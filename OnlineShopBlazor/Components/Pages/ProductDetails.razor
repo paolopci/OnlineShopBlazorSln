@@ -87,77 +87,34 @@
                             <p>@Product.Description </p>
                         </div>
                         <div class="product_variant">
-                            <div class="filter__list widget_color d-flex align-items-center">
-                                <h3>select color</h3>
-                                <ul>
-                                    <li>
-                                        <input type="checkbox">
-                                        <span class="checkmark color1"></span>
-                                    </li>
-                                    <li>
-                                        <input type="checkbox">
-                                        <span class="checkmark color2"></span>
-                                    </li>
-                                    <li>
-                                        <input type="checkbox">
-                                        <span class="checkmark color3"></span>
-                                    </li>
-                                    <li>
-                                        <input type="checkbox">
-                                        <span class="checkmark color5"></span>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="filter__list widget_size d-flex align-items-center">
-                                <h3>select size</h3>
-                                <ul>
-                                    <li>
-                                        <a href="javascript:void(0)">S </a>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:void(0)"> M</a>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:void(0)">L</a>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:void(0)"> XL</a>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:void(0)">XLL</a>
-                                    </li>
-                                </ul>
-                            </div>
 
                             <div class="variant_quantity_btn d-flex">
-                                <div class="pro-qty border">
-                                    <input min="1" max="100" type="tex" value="1">
-                                </div>
-                                <button class="button btn btn-primary" type="submit"><i class="ion-android-add"></i> Add
-                                    To Cart</button>
-                                <a class="wishlist" href="#"><i class="ion-ios-heart"></i></a>
+                                @if (Product?.Qty > 0)
+                                {
+                                    <button class="button btn btn-primary" type="submit">
+                                        <i class="ion-android-add"></i>
+                                        Add To Cart
+                                    </button>
+                                }
                             </div>
                         </div>
                         <div class="product_sku">
-                            <p><span>SKU: </span> #ABC123456</p>
+                            <p><span>SKU: </span> #PRI @Product.Id</p>
                         </div>
                         <div class="product_tags d-flex">
-                            <span>tags: </span>
-                            <ul class="d-flex">
-                                <li><a href="#">fashion,</a></li>
-                                <li><a href="#">clothings,</a></li>
-                                <li><a href="#">accessorires</a></li>
-                            </ul>
-                        </div>
-                        <div class="priduct_social d-flex">
-                            <span>SHARE: </span>
-                            <ul>
-                                <li><a href="#"><i class="ion-social-twitter"></i></a></li>
-                                <li><a href="#"><i class="ion-social-facebook"></i></a></li>
-                                <li><a href="#"><i class="ion-social-googleplus-outline"></i></a></li>
-                                <li><a href="#"><i class="ion-social-pinterest"></i></a></li>
-                                <li><a href="#"><i class="ion-social-instagram-outline"></i></a></li>
-                            </ul>
+                            @if (!string.IsNullOrEmpty(Product?.Tags))
+                            {
+                                var tags = Product.Tags.Split(',');
+                                <span>tags: </span>
+                                <ul class="d-flex">
+                                    @foreach (var item in tags)
+                                    {
+                                        <li><a href="/shop?q=@item">@item,</a></li>
+                                    }
+
+                                </ul>
+                            }
+
                         </div>
                     </form>
                 </div>
