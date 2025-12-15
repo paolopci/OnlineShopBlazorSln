@@ -36,7 +36,7 @@
             <div class="col-lg-6 col-md-6">
                 <div class="product_d_right">
                     <form action="#">
-                        <h1>Edwin T-Shirt Logo Script Print in Navy</h1>
+                        <h1>@Product?.Title</h1>
                         <div class="product_ratting_review d-flex align-items-center">
                             <div class=" product_ratting">
                                 <ul class="d-flex">
@@ -55,8 +55,18 @@
                             </div>
                         </div>
                         <div class="price_box">
-                            <span class="current_price">$39.00</span>
+                            <span class="current_price">@GetCurrentPrice().ToString("C2")</span>
+                            @if (HasDiscount)
+                            {
+                                <span class="old_price">@Product?.Price?.ToString("C2")</span>
+                            }
                         </div>
+                        @if (HasDiscount)
+                        {
+                            <div class="product_label">
+                                <span>-@Product?.Discount?.ToString("F0")%</span>
+                            </div>
+                        }
                         <div class="product_availalbe">
                             <ul class="d-flex">
                                 <li><i class="icon-layers icons"></i> Only <span>15</span> left </li>
@@ -733,5 +743,19 @@
         Galleries = await dbContext.ProductGalleries
         .Where(g => g.ProductId == Product.Id)
         .ToListAsync();
+    }
+
+    private bool HasDiscount => (Product?.Discount ?? 0) > 0;
+
+    private decimal GetCurrentPrice()
+    {
+        var price = Product?.Price ?? 0;
+        if (!HasDiscount)
+        {
+            return price;
+        }
+
+        var discount = Product?.Discount ?? 0;
+        return price - (price * discount / 100);
     }
 }
