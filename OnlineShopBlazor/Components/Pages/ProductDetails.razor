@@ -104,12 +104,12 @@
                         <div class="product_tags d-flex">
                             @if (!string.IsNullOrEmpty(Product?.Tags))
                             {
-                                var tags = Product.Tags.Split(',');
+                                var tags = Product.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                                 <span>tags: </span>
                                 <ul class="d-flex">
                                     @foreach (var item in tags)
                                     {
-                                        <li><a href="/shop?q=@item">@item,</a></li>
+                                        <li><a href="/shop?q=@item">@item</a></li>
                                     }
 
                                 </ul>

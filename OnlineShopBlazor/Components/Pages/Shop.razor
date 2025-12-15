@@ -169,10 +169,13 @@
         using var context = DbFactory.CreateDbContext();
         var query = context.Products.AsQueryable();
 
-        if (!string.IsNullOrWhiteSpace(q))
+        var searchTerm = q?.Trim();
+        if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            query = query.Where(x => (x.Title != null && x.Title.Contains(q)) || (x.Description != null &&
-            x.Description.Contains(q)));
+            query = query.Where(x =>
+                (x.Title != null && EF.Functions.Like(x.Title, $"%{searchTerm}%")) ||
+                (x.Description != null && EF.Functions.Like(x.Description, $"%{searchTerm}%")) ||
+                (x.Tags != null && EF.Functions.Like(x.Tags, $"%{searchTerm}%")));
         }
 
         Products = await query.OrderByDescending(x => x.Id).ToListAsync();
